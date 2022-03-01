@@ -21,7 +21,7 @@ const uint16_t D3 = 0b0000000000000100;
 const uint16_t D4 = 0b0000000000000010;
 const uint16_t L1 = 0b0000010000000000;
 
-const uint8_t toDisplay[4] = {2, 0, 4, 2};
+const uint16_t toDisplay[4] = {1, 3, 4, 2};
 
 // void setup() {
 //     pinMode(DS, OUTPUT);
@@ -31,11 +31,41 @@ const uint8_t toDisplay[4] = {2, 0, 4, 2};
 
 // void loop() {
 //     for (int i = 0; i < 4; i++) {
-//         drawNumber(getDigit(toDisplay[i]), getDigitPosition(i));
+//         drawNumber(toDisplay[i], i);
 //     }
-//     drawNumber(CLOCK_DIVIDER, L1);
+//     drawNumber(10, 4);
 // }
-
+void displaySetup() {
+    pinMode(DS, OUTPUT);
+    pinMode(SHCP, OUTPUT);
+    pinMode(STCP, OUTPUT);
+}
+/**
+ * @brief Writes the number array on the display. Left most value goes to the left-most
+ * position of the display
+ *
+ * @param numberArr - array
+ * @param size - [1,4] - size of the given array
+ * @param clkDiv - Enables the clock divider in the display
+ */
+void drawNumbers(const uint8_t* numberArr, uint8_t size, bool clkDiv) {
+    if (size < 0 || size > 4) {
+        // size out of bounds
+        return;
+    }
+    for (int i = 0; i < size; i++) {
+        drawNumber(numberArr[i], i);
+    }
+    if (clkDiv) {
+        drawNumber(10, 4);
+    }
+}
+/**
+ * @brief Draws a number into the specified digit position
+ *
+ * @param number
+ * @param digit - position [0,4]
+ */
 void drawNumber(const uint8_t number, const uint8_t digit) {
     uint16_t byteValue = getDigit(number) + getDigitPosition(digit);
     // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
@@ -46,7 +76,7 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
 
     // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
     digitalWrite(STCP, HIGH);
-    delay(1000);
+    delay(2.5);
 }
 
 /*
@@ -102,6 +132,5 @@ uint16_t getDigit(const uint8_t num) {
             return CLOCK_DIVIDER;
         default:
             return 0;
-            ;
     }
 }
