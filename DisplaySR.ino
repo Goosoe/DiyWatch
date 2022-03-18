@@ -1,3 +1,14 @@
+/**
+ * @file DisplaySR.ino
+ * @author Miguel L.(you@domain.com)
+ * @brief This class writes on a 4 digit display - LTC-2623G
+ * @version 0.1
+ * @date 2022-03-18
+ *
+ * @copyright Copyright (c) 2022
+ *
+ */
+
 const byte DS = 8;
 const byte STCP = 9;
 const byte SHCP = 10;
@@ -23,6 +34,7 @@ const uint16_t L1 = 0b0000010000000000;
 
 const uint16_t toDisplay[4] = {1, 3, 4, 2};
 
+bool screenOn = true;
 // void setup() {
 //     pinMode(DS, OUTPUT);
 //     pinMode(SHCP, OUTPUT);
@@ -36,28 +48,32 @@ const uint16_t toDisplay[4] = {1, 3, 4, 2};
 //     drawNumber(10, 4);
 // }
 void displaySetup() {
+    // prepare Shift Registers
     pinMode(DS, OUTPUT);
     pinMode(SHCP, OUTPUT);
     pinMode(STCP, OUTPUT);
 }
 /**
  * @brief Writes the number array on the display. Left most value goes to the left-most
- * position of the display
+ * position of the display. If size > 4, it draws the first 4 values
  *
  * @param numberArr - array
- * @param size - [1,4] - size of the given array
+ * @param size - [1,n] - size of the given array
  * @param clkDiv - Enables the clock divider in the display
  */
-void drawNumbers(const uint8_t* numberArr, uint8_t size, bool clkDiv) {
-    if (size < 0 || size > 4) {
+void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
+    if (size < 0) {
         // size out of bounds
         return;
+    } else if (size > 4) {
+        size = 4;
     }
+
     for (int i = 0; i < size; i++) {
         drawNumber(numberArr[i], i);
     }
     if (clkDiv) {
-        drawNumber(10, 4);
+        drawNumber(10, 4);  // 10 is the value representing the clock divider
     }
 }
 /**
@@ -67,6 +83,8 @@ void drawNumbers(const uint8_t* numberArr, uint8_t size, bool clkDiv) {
  * @param digit - position [0,4]
  */
 void drawNumber(const uint8_t number, const uint8_t digit) {
+    // TODO: make verification  if previous call was already turn off so it stops writing in shift registers and saving energy
+
     uint16_t byteValue = getDigit(number) + getDigitPosition(digit);
     // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
     digitalWrite(STCP, LOW);
@@ -76,16 +94,18 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
 
     // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
     digitalWrite(STCP, HIGH);
+    // TODO: change delay to fps
     delay(2.5);
 }
 
-/*
- * Gets the byte representation of the digit position
-    0-3 - Selects a digit left to right
-    4 - Clock divider
+/**
+ * @brief  Gets the byte representation of the digit position
+ * 0-3 - Selects a digit left to right
+ * 4 - Clock divider
+ * @param digit - position [0,4]
  */
 uint16_t getDigitPosition(const uint8_t digit) {
-    if (digit < 0 || digit > 4) {
+    if (digit < 0 || digit > 4 || !screenOn) {
         return 0;
     }
 
@@ -133,4 +153,22 @@ uint16_t getDigit(const uint8_t num) {
         default:
             return 0;
     }
+}
+
+void turnOff() {
+    screenOn = false;
+}
+
+void turnOn() {
+    screenOn = true;
+}
+/**
+ * @brief Makes all anode bits turn off when drawing
+ *
+ */
+void switchScreenPower() {
+    screenOn = !screenOn;
+}
+bool isOn() {
+    return screenOn;
 }
