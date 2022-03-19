@@ -35,6 +35,8 @@ const uint16_t L1 = 0b0000010000000000;
 const uint16_t toDisplay[4] = {1, 3, 4, 2};
 
 bool screenOn = true;
+bool editMode = false;
+bool clkDiv = true;
 // void setup() {
 //     pinMode(DS, OUTPUT);
 //     pinMode(SHCP, OUTPUT);
@@ -169,6 +171,14 @@ void turnOn() {
 void switchScreenPower() {
     screenOn = !screenOn;
 }
-bool isOn() {
-    return screenOn;
+// bool isOn() {
+//     return screenOn;
+// }
+
+void switchEditMode() {
+    editMode = !editMode;
+}
+
+void switchClockDivider() {
+    clkDiv = !clkDiv;
 }

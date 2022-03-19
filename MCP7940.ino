@@ -4,10 +4,7 @@
 
 #include <Wire.h>
 
-// #include "DisplaySR.ino"
-
 const uint8_t RTC_ADRESS = 0x6F;  // RTC I2C adress
-// TODO: make this code enum
 
 /* TIME-KEEPING REGISTERS (Bytes)*/
 const uint8_t SEC_REG = 0x00;
@@ -23,17 +20,15 @@ const uint8_t OSC_TRIM_REG = 0x08;
 /* ALARM REGISTER */
 
 // const uint8_t RTC_READ = 1;
-bool clkDiv;
 
-uint8_t frames;
+// uint8_t frames;
 
 // uint8_t loops;
 
-void setup() {
+void rtcSetup() {
     displaySetup();
-    clkDiv = true;
 
-    frames = 0;
+    // frames = 0;
     // loops = 0;
     Wire.begin();
     Wire.setClock(100000);  // 10kHz is the default I2C communication
@@ -42,36 +37,36 @@ void setup() {
     writeBit(HOUR_REG, 6, 1);  // setting 24h pattern
 }
 
-void loop() {
-    // Wire.requestFrom(RTC_ADRESS, 2, false);
-    // readByte(0x00);
-    uint8_t size = 6;
-    uint8_t timeArr[size] = {0};
-    // getSecs(readByte(0x00), arr);
-    // getMins(readByte(0x01), arr);
-    getTime(timeArr, size);
-    drawNumbers(timeArr, size, clkDiv);
+// void loop() {
+//     // Wire.requestFrom(RTC_ADRESS, 2, false);
+//     // readByte(0x00);
+//     uint8_t size = 6;
+//     uint8_t timeArr[size] = {0};
+//     // getSecs(readByte(0x00), arr);
+//     // getMins(readByte(0x01), arr);
+//     getTime(timeArr, size);
+//     drawNumbers(timeArr, size, clkDiv);
 
-    frames++;
-    if (frames == 60) {
-        frames = 0;
-        switchScreenPower();
-    }
-    // loops++;
-    // if (loops % 10 == 0) {
-    //     clkDiv = !clkDiv;
-    //     loops = 0;
-    // }
-    // drawNumber(uint8_t(1), uint8_t(0));
+//     frames++;
+//     if (frames == 60) {
+//         frames = 0;
+//         switchScreenPower();
+//     }
+//     // loops++;
+//     // if (loops % 10 == 0) {
+//     //     clkDiv = !clkDiv;
+//     //     loops = 0;
+//     // }
+//     // drawNumber(uint8_t(1), uint8_t(0));
 
-    // while (Wire.available()) {  // peripheral may send less than requested
+//     // while (Wire.available()) {  // peripheral may send less than requested
 
-    //     byte b = Wire.read();  // receive a byte as character
-    //     Serial.print(b);
-    //     // first two bytes are read the same way as minutes and seconds
-    //     // Serial.print(getMinOrSecs(Wire.read()));  // print the character
-    // }
-}
+//     //     byte b = Wire.read();  // receive a byte as character
+//     //     Serial.print(b);
+//     //     // first two bytes are read the same way as minutes and seconds
+//     //     // Serial.print(getMinOrSecs(Wire.read()));  // print the character
+//     // }
+// }
 /**
  * @brief Get the Time object
  *
@@ -107,28 +102,6 @@ uint8_t getTime(uint8_t* arr, uint8_t size) {
 
     return 0;
 }
-
-/*Receives the second or minute byte and converts it into a readable int*/
-// uint8_t getMinOrSecs(byte addr) {
-//     uint8_t secOne = addr & 0xF;
-//     uint8_t secTens = (addr >> 4) & 0x7;
-//     return (secTens * 10) + secOne;
-// }
-
-// // TODO:EXPERIMENTAL
-// void getSecs(byte time, uint8_t* arr) {
-//     uint8_t secOne = time & 0xF;
-//     uint8_t secTens = (time >> 4) & 0x7;
-//     arr[2] = secTens;
-//     arr[3] = secOne;
-// }
-// // TODO:EXPERIMENTAL
-// void getMins(byte time, uint8_t* arr) {
-//     uint8_t minOne = time & 0xF;
-//     uint8_t minTens = (time >> 4) & 0x7;
-//     arr[0] = minTens;
-//     arr[1] = minOne;
-// }
 
 uint8_t readByte(uint8_t address) {
     byte val = 0;
