@@ -1,80 +1,6 @@
-/**
- * MCP7940 I2C comm library
- */
+#include "RTC.h"
 
-#include <Wire.h>
-
-const uint8_t RTC_ADRESS = 0x6F;  // RTC I2C adress
-
-/* TIME-KEEPING REGISTERS (Bytes)*/
-const uint8_t SEC_REG = 0x00;
-const uint8_t MIN_REG = 0x01;
-const uint8_t HOUR_REG = 0x02;
-const uint8_t WEEK_DAY_REG = 0x03;
-const uint8_t DATE_REG = 0x04;
-const uint8_t MONTH_REG = 0x05;
-const uint8_t YEAR_REG = 0x06;
-const uint8_t CONTROL_REG = 0x07;
-const uint8_t OSC_TRIM_REG = 0x08;
-
-/* ALARM REGISTER */
-
-// const uint8_t RTC_READ = 1;
-
-// uint8_t frames;
-
-// uint8_t loops;
-
-void rtcSetup() {
-    displaySetup();
-
-    // frames = 0;
-    // loops = 0;
-    Wire.begin();
-    Wire.setClock(100000);  // 10kHz is the default I2C communication
-    Serial.begin(9600);
-    writeBit(SEC_REG, 7, 1);   // starting up the oscilattor using the ST bit
-    writeBit(HOUR_REG, 6, 1);  // setting 24h pattern
-}
-
-// void loop() {
-//     // Wire.requestFrom(RTC_ADRESS, 2, false);
-//     // readByte(0x00);
-//     uint8_t size = 6;
-//     uint8_t timeArr[size] = {0};
-//     // getSecs(readByte(0x00), arr);
-//     // getMins(readByte(0x01), arr);
-//     getTime(timeArr, size);
-//     drawNumbers(timeArr, size, clkDiv);
-
-//     frames++;
-//     if (frames == 60) {
-//         frames = 0;
-//         switchScreenPower();
-//     }
-//     // loops++;
-//     // if (loops % 10 == 0) {
-//     //     clkDiv = !clkDiv;
-//     //     loops = 0;
-//     // }
-//     // drawNumber(uint8_t(1), uint8_t(0));
-
-//     // while (Wire.available()) {  // peripheral may send less than requested
-
-//     //     byte b = Wire.read();  // receive a byte as character
-//     //     Serial.print(b);
-//     //     // first two bytes are read the same way as minutes and seconds
-//     //     // Serial.print(getMinOrSecs(Wire.read()));  // print the character
-//     // }
-// }
-/**
- * @brief Get the Time object
- *
- * @param arr - Array to put the Time either HH.mm.ss or HH.mm
- * @param size
- * @return 0 if ok, 1 if not ok
- */
-// TODO; Make size an enum that defines either 4 or 6 digit time
+namespace rtc {
 uint8_t getTime(uint8_t* arr, uint8_t size) {
     if (size != 4 && size != 6) {
         return 1;
@@ -122,21 +48,12 @@ uint8_t readByte(uint8_t address) {
     }
     return val;
 }
-
 void writeByte(uint8_t address, uint8_t value) {
     Wire.beginTransmission(RTC_ADRESS);  // Address the I2C device
     Wire.write(address);                 // Send register address to read from
     Wire.write(value);                   // write the data
     uint8_t i = Wire.endTransmission();  // close transmission and save status
 }
-
-/**
- * @brief Writes a specific bit in a register
- *
- * @param reg - register to write
- * @param pos - 0-7, being 7 the most significant bit
- * @param bit - 0 or 1
- */
 void writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
     switch (bit) {
         case 0: {
@@ -152,3 +69,4 @@ void writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
             ;
     }
 }
+};
