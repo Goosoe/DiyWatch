@@ -1,7 +1,7 @@
+
 #include "RTC.h"
 
-namespace rtc {
-uint8_t getTime(uint8_t* arr, uint8_t size) {
+uint8_t rtc::getTime(uint8_t* arr, uint8_t size) {
     if (size != 4 && size != 6) {
         return 1;
     }
@@ -29,7 +29,7 @@ uint8_t getTime(uint8_t* arr, uint8_t size) {
     return 0;
 }
 
-uint8_t readByte(uint8_t address) {
+uint8_t rtc::readByte(uint8_t address) {
     byte val = 0;
     Wire.beginTransmission(RTC_ADRESS);            // queues bytes to be sent to a slave with the given register
     Wire.write(address);                           // Request the seconds register
@@ -48,13 +48,13 @@ uint8_t readByte(uint8_t address) {
     }
     return val;
 }
-void writeByte(uint8_t address, uint8_t value) {
+void rtc::writeByte(uint8_t address, uint8_t value) {
     Wire.beginTransmission(RTC_ADRESS);  // Address the I2C device
     Wire.write(address);                 // Send register address to read from
     Wire.write(value);                   // write the data
     uint8_t i = Wire.endTransmission();  // close transmission and save status
 }
-void writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
+void rtc::writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
     switch (bit) {
         case 0: {
             uint8_t highValue = 254;  // 1111 1110
@@ -69,4 +69,3 @@ void writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
             ;
     }
 }
-};

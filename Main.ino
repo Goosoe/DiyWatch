@@ -5,7 +5,7 @@
 void setup() {
     display::setup();
     rtc::setup();
-    controls::setup();
+    // controls::setup();
     Serial.begin(9600);  // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
     // Serial.print(getnum());
 }

@@ -1,14 +1,23 @@
+
+// press or hold is declared if the button was released or not in x time
+#pragma once
+#include <stdint.h>
+
+namespace controls {
+
 const uint8_t BUTTON_ONE = 11;
 const uint8_t BUTTON_TWO = 12;
 
-enum COMMANDS {};
+// enum COMMANDS { BUTTON_ONE_PRESS,
+//                 BUTTON_TWO_PRESS,
+//                 BUTTON_ONE_HOLD,
+//                 BUTTON_TWO_HOLD,
+//                 NONE };
 
-namespace controls {
 void setup() {
     pinMode(BUTTON_ONE, INPUT);
     pinMode(BUTTON_ONE, INPUT);
 }
-
 };  // namespace controls
 
 // Serial.print("Button one: ");

@@ -10,7 +10,7 @@
  *
  * @copyright Copyright (c) 2022
  */
-
+#pragma once
 #include <Arduino.h>
 #include <Wire.h>
 

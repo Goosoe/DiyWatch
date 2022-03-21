@@ -1,3 +1,4 @@
+#pragma once
 #include <Arduino.h>
 #include <stdint.h>
 
@@ -73,4 +74,4 @@ void toggleClockDivider() { clkDiv = !clkDiv; }
  * @param clkDiv - Enables the clock divider in the display
  */
 void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv);
-};  // namespace display
+}

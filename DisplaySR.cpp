@@ -1,6 +1,6 @@
 #include "DisplaySR.h"
-namespace display {
-void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
+
+void display::drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
     if (size < 0) {
         // size out of bounds
         return;
@@ -16,7 +16,7 @@ void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
     }
 }
 
-void drawNumber(const uint8_t number, const uint8_t digit) {
+void display::drawNumber(const uint8_t number, const uint8_t digit) {
     // TODO: make verification  if previous call was already turn off so it stops writing in shift registers and saving energy
 
     uint16_t byteValue = getDigit(number) + getDigitPosition(digit);
@@ -32,7 +32,7 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
     delay(2.5);
 }
 
-uint16_t getDigit(const uint8_t num) {
+uint16_t display::getDigit(const uint8_t num) {
     switch (num) {
         case 0:
             return ZERO;
@@ -61,7 +61,7 @@ uint16_t getDigit(const uint8_t num) {
     }
 }
 
-uint16_t getDigitPosition(const uint8_t digit) {
+uint16_t display::getDigitPosition(const uint8_t digit) {
     if (digit < 0 || digit > 4 || !screenOn) {
         return 0;
     }
@@ -79,4 +79,3 @@ uint16_t getDigitPosition(const uint8_t digit) {
             return L1;
     }
 }
-};
