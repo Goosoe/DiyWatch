@@ -2,19 +2,40 @@
  * @file DisplaySR.h
  * @author Goosoe
  * @brief This file has all the functions required to properly write in the 7-segment display being used.
- * The digits and segments are being controlled by two daisy chained shift registers.
+ * The digits and segments are being controlled by two daisy chained shift registers
  * @version 0.1
  * @date 2022-03-27
- * 
+ *
  * @copyright Copyright (c) 2022
- * 
+ *
  */
 
 #pragma once
 #include <stdint.h>
 namespace timeDisplay {
-// TODO: use bits instead of bools. Research must be made
 
+const uint8_t DS = 8;
+const uint8_t STCP = 9;
+const uint8_t SHCP = 10;
+// SEGMENT SELECTOR - HIGH IS OFF
+const uint16_t ZERO = 0b0000000000010000;
+const uint16_t ONE = 0b0100100001110000;
+const uint16_t TWO = 0b0001000000100000;
+const uint16_t THREE = 0b0000000001100000;
+const uint16_t FOUR = 0b0100100001000000;
+const uint16_t FIVE = 0b0010000001000000;
+const uint16_t SIX = 0b0010000000000000;
+const uint16_t SEVEN = 0b0000100001110000;
+const uint16_t EIGHT = 0b0000000000000000;
+const uint16_t NINE = 0b0000000001000000;
+const uint16_t CLOCK_DIVIDER = 0b0001000000000000;
+
+// DIGIT POSITION SELECTOR - LOW IS OFF
+const uint16_t D1 = 0b0000001000000000;
+const uint16_t D2 = 0b0000000000001000;
+const uint16_t D3 = 0b0000000000000100;
+const uint16_t D4 = 0b0000000000000010;
+const uint16_t L1 = 0b0000010000000000;
 void setup();
 
 /**

@@ -3,43 +3,20 @@
 #include <Arduino.h>
 
 namespace timeDisplay {
-const uint8_t DS = 8;
-const uint8_t STCP = 9;
-const uint8_t SHCP = 10;
-// SEGMENT SELECTOR - HIGH IS OFF
-const uint16_t ZERO = 0b0000000000010000;
-const uint16_t ONE = 0b0100100001110000;
-const uint16_t TWO = 0b0001000000100000;
-const uint16_t THREE = 0b0000000001100000;
-const uint16_t FOUR = 0b0100100001000000;
-const uint16_t FIVE = 0b0010000001000000;
-const uint16_t SIX = 0b0010000000000000;
-const uint16_t SEVEN = 0b0000100001110000;
-const uint16_t EIGHT = 0b0000000000000000;
-const uint16_t NINE = 0b0000000001000000;
-const uint16_t CLOCK_DIVIDER = 0b0001000000000000;
 
-// DIGIT POSITION SELECTOR - LOW IS OFF
-const uint16_t D1 = 0b0000001000000000;
-const uint16_t D2 = 0b0000000000001000;
-const uint16_t D3 = 0b0000000000000100;
-const uint16_t D4 = 0b0000000000000010;
-const uint16_t L1 = 0b0000010000000000;
-
+// TODO: use bits instead of bools. Research must be made
 bool screenOn = true;
 bool editMode = false;
 bool clkDiv = true;
 
-};  // namespace timeDisplay
-
-void timeDisplay::setup() {
+void setup() {
     // prepare Shift Registers
     pinMode(DS, OUTPUT);
     pinMode(SHCP, OUTPUT);
     pinMode(STCP, OUTPUT);
 }
 
-void timeDisplay::drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
+void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
     if (size < 0) {
         // size out of bounds
         return;
@@ -55,7 +32,7 @@ void timeDisplay::drawNumbers(const uint8_t* numberArr, uint8_t size, const bool
     }
 }
 
-void timeDisplay::drawNumber(const uint8_t number, const uint8_t digit) {
+void drawNumber(const uint8_t number, const uint8_t digit) {
     // TODO: make verification  if previous call was already turn off so it stops writing in shift registers and saving energy
 
     uint16_t byteValue = getDigit(number) + getDigitPosition(digit);
@@ -71,7 +48,7 @@ void timeDisplay::drawNumber(const uint8_t number, const uint8_t digit) {
     delay(2.5);
 }
 
-uint16_t timeDisplay::getDigit(const uint8_t num) {
+uint16_t getDigit(const uint8_t num) {
     switch (num) {
         case 0:
             return ZERO;
@@ -100,7 +77,7 @@ uint16_t timeDisplay::getDigit(const uint8_t num) {
     }
 }
 
-uint16_t timeDisplay::getDigitPosition(const uint8_t digit) {
+uint16_t getDigitPosition(const uint8_t digit) {
     if (digit < 0 || digit > 4 || !screenOn) {
         return 0;
     }
@@ -119,8 +96,9 @@ uint16_t timeDisplay::getDigitPosition(const uint8_t digit) {
     }
 }
 
-inline void timeDisplay::toggleEditMode() { editMode = !editMode; }
+inline void toggleEditMode() { editMode = !editMode; }
 
-inline void timeDisplay::toggleScreenPower() { screenOn = !screenOn; }
+inline void toggleScreenPower() { screenOn = !screenOn; }
 
-inline void timeDisplay::toggleClockDivider() { clkDiv = !clkDiv; }
+inline void toggleClockDivider() { clkDiv = !clkDiv; }
+};  // namespace timeDisplay
