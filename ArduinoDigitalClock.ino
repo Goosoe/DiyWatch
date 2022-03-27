@@ -1,6 +1,6 @@
 #include "Controls.h"
-#include "DisplaySR.h"
 #include "RTC.h"
+#include "TimeDisplay.h"
 
 void setup() {
     timeDisplay::setup();

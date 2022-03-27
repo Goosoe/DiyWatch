@@ -1,5 +1,5 @@
 /**
- * @file DisplaySR.h
+ * @file TimeDisplay.h
  * @author Goosoe
  * @brief This file has all the functions required to properly write in the 7-segment display being used.
  * The digits and segments are being controlled by two daisy chained shift registers
