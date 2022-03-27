@@ -14,10 +14,7 @@ const uint8_t BUTTON_TWO = 12;
 //                 BUTTON_TWO_HOLD,
 //                 NONE };
 
-void setup() {
-    pinMode(BUTTON_ONE, INPUT);
-    pinMode(BUTTON_ONE, INPUT);
-}
+void setup();
 };  // namespace controls
 
 // Serial.print("Button one: ");

@@ -1,9 +1,14 @@
 
 #include "Controls.h"
 
-// namespace controls {
+#include <Arduino.h>
 
-// };  // namespace controls
+namespace controls {
+void setup() {
+    pinMode(BUTTON_ONE, INPUT);
+    pinMode(BUTTON_ONE, INPUT);
+}
+};  // namespace controls
 
 // Serial.print("Button one: ");
 // Serial.println(digitalRead(BUTTON_ONE));
