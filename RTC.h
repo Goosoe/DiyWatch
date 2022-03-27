@@ -7,36 +7,20 @@
  * of I2C and RTC IC's.
  * @version 0.1
  * @date 2022-03-19
- *
  * @copyright Copyright (c) 2022
  */
 #pragma once
-#include <Arduino.h>
-#include <Wire.h>
+#include <stdint.h>
 
-namespace rtc {
-const uint8_t RTC_ADRESS = 0x6F;  // RTC I2C adress
+namespace mcpRtc {
 
-/* TIME-KEEPING REGISTERS (Bytes)*/
-const uint8_t SEC_REG = 0x00;
-const uint8_t MIN_REG = 0x01;
-const uint8_t HOUR_REG = 0x02;
-const uint8_t WEEK_DAY_REG = 0x03;
-const uint8_t DATE_REG = 0x04;
-const uint8_t MONTH_REG = 0x05;
-const uint8_t YEAR_REG = 0x06;
-const uint8_t CONTROL_REG = 0x07;
-const uint8_t OSC_TRIM_REG = 0x08;
+void setup();
 
 uint8_t readByte(uint8_t address);
+
 void writeByte(uint8_t address, uint8_t value);
+
 void writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit);
 
-void setup() {
-    Wire.begin();
-    Wire.setClock(100000);    // 10kHz is the default I2C communication frequency
-    writeBit(SEC_REG, 7, 1);  // starting up the oscilattor using the ST bit
-    writeBit(HOUR_REG, 6, 1);
-}
 uint8_t getTime(uint8_t* arr, uint8_t size);
-};  // namespace rtc
+};  // namespace mcpRtc

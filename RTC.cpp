@@ -1,7 +1,31 @@
-
 #include "RTC.h"
 
-uint8_t rtc::getTime(uint8_t* arr, uint8_t size) {
+#include <Arduino.h>
+#include <Wire.h>
+namespace mcpRtc {
+const uint8_t RTC_ADRESS = 0x6F;  // RTC I2C adress
+
+/* TIME-KEEPING REGISTERS (Bytes)*/
+const uint8_t SEC_REG = 0x00;
+const uint8_t MIN_REG = 0x01;
+const uint8_t HOUR_REG = 0x02;
+const uint8_t WEEK_DAY_REG = 0x03;
+const uint8_t DATE_REG = 0x04;
+const uint8_t MONTH_REG = 0x05;
+const uint8_t YEAR_REG = 0x06;
+const uint8_t CONTROL_REG = 0x07;
+const uint8_t OSC_TRIM_REG = 0x08;
+
+}  // namespace mcpRtc
+
+void mcpRtc::setup() {
+    Wire.begin();
+    Wire.setClock(100000);    // 10kHz is the default I2C communication frequency
+    writeBit(SEC_REG, 7, 1);  // starting up the oscilattor using the ST bit
+    writeBit(HOUR_REG, 6, 1);
+}
+
+uint8_t mcpRtc::getTime(uint8_t* arr, uint8_t size) {
     if (size != 4 && size != 6) {
         return 1;
     }
@@ -29,7 +53,7 @@ uint8_t rtc::getTime(uint8_t* arr, uint8_t size) {
     return 0;
 }
 
-uint8_t rtc::readByte(uint8_t address) {
+uint8_t mcpRtc::readByte(uint8_t address) {
     byte val = 0;
     Wire.beginTransmission(RTC_ADRESS);            // queues bytes to be sent to a slave with the given register
     Wire.write(address);                           // Request the seconds register
@@ -48,13 +72,15 @@ uint8_t rtc::readByte(uint8_t address) {
     }
     return val;
 }
-void rtc::writeByte(uint8_t address, uint8_t value) {
+
+void mcpRtc::writeByte(uint8_t address, uint8_t value) {
     Wire.beginTransmission(RTC_ADRESS);  // Address the I2C device
     Wire.write(address);                 // Send register address to read from
     Wire.write(value);                   // write the data
     uint8_t i = Wire.endTransmission();  // close transmission and save status
 }
-void rtc::writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
+
+void mcpRtc::writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
     switch (bit) {
         case 0: {
             uint8_t highValue = 254;  // 1111 1110
@@ -64,8 +90,6 @@ void rtc::writeBit(const uint8_t reg, const uint8_t pos, const uint8_t bit) {
         case 1:
             writeByte(reg, readByte(reg) | (bit << pos));
             break;
-        default:
-            // does nothing
-            ;
+        default:;  // does nothing
     }
 }
