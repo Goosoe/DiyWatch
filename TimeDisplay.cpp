@@ -9,6 +9,10 @@ bool screenOn = true;
 bool editMode = false;
 bool clkDiv = true;
 
+int lastUpdate = 0;  // time in ms
+int row = 0;         // current row to draw
+int previousRow = 0;
+
 void setup() {
     // prepare Shift Registers
     pinMode(DS, OUTPUT);
@@ -16,36 +20,26 @@ void setup() {
     pinMode(STCP, OUTPUT);
 }
 
-void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv) {
-    if (size < 0) {
-        // size out of bounds
+void drawNumbers(const uint8_t* numberArr) {
+    if (previousRow == row) {
         return;
-    } else if (size > 4) {
-        size = 4;
     }
-
-    for (int i = 0; i < size; i++) {
-        drawNumber(numberArr[i], i);
-    }
-    if (clkDiv) {
-        drawNumber(10, 4);  // 10 is the value representing the clock divider
+    // TODO: there must be a way to upgrade the if/else
+    if (row != DISPLAY_DIGITS - 1) {
+        drawNumber(numberArr[row], row);
+    } else {  // draw clockDivider
+        drawNumber(10, row);
     }
 }
 
 void drawNumber(const uint8_t number, const uint8_t digit) {
-    // TODO: make verification  if previous call was already turn off so it stops writing in shift registers and saving energy
-
     uint16_t byteValue = getDigit(number) + getDigitPosition(digit);
-    // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
-    digitalWrite(STCP, LOW);
-    // shiftOut(DS, SHCP, MSBFIRST, D1);
-    shiftOut(DS, SHCP, LSBFIRST, byteValue);
-    shiftOut(DS, SHCP, LSBFIRST, byteValue >> 8);
+    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
-    // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
-    digitalWrite(STCP, HIGH);
-    // TODO: change delay to fps
-    delay(2.5);
+    shiftOut(DS, SHCP, LSBFIRST, byteValue);
+    shiftOut(DS, SHCP, LSBFIRST, byteValue >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
+
+    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
 }
 
 uint16_t getDigit(const uint8_t num) {
@@ -78,7 +72,7 @@ uint16_t getDigit(const uint8_t num) {
 }
 
 uint16_t getDigitPosition(const uint8_t digit) {
-    if (digit < 0 || digit > 4 || !screenOn) {
+    if (!screenOn) {
         return 0;
     }
 
@@ -93,6 +87,20 @@ uint16_t getDigitPosition(const uint8_t digit) {
             return D4;
         case 4:
             return L1;
+        default:
+            return D1;
+    }
+}
+
+void update(int currentTime) {
+    uint8_t moduloDiv = DISPLAY_DIGITS;
+    if (!clkDiv) {
+        moduloDiv--;
+    }
+    if (currentTime - lastUpdate >= UPDATE_TIME) {
+        previousRow = row;
+        row = (row + 1) % moduloDiv;
+        lastUpdate = currentTime;
     }
 }
 
@@ -101,4 +109,5 @@ inline void toggleEditMode() { editMode = !editMode; }
 inline void toggleScreenPower() { screenOn = !screenOn; }
 
 inline void toggleClockDivider() { clkDiv = !clkDiv; }
+
 };  // namespace timeDisplay

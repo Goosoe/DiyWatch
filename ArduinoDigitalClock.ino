@@ -2,6 +2,9 @@
 #include "RTC.h"
 #include "TimeDisplay.h"
 
+const uint8_t SIZE = 6;
+uint8_t timeArr[SIZE] = {0};
+
 void setup() {
     timeDisplay::setup();
     mcpRtc::setup();
@@ -11,8 +14,12 @@ void setup() {
 }
 
 void loop() {
-    uint8_t size = 6;
-    uint8_t timeArr[size] = {0};
-    mcpRtc::getTime(timeArr, size);
-    timeDisplay::drawNumbers(timeArr, size, true);
+    updateTimers();
+    mcpRtc::getTime(timeArr, SIZE);
+    timeDisplay::drawNumbers(timeArr);
+}
+
+void updateTimers() {
+    int currentTime = millis();
+    timeDisplay::update(currentTime);  // TimeDisplay update
 }

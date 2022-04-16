@@ -1,7 +1,7 @@
 /**
  * @file TimeDisplay.h
  * @author Goosoe
- * @brief This file has all the functions required to properly write in the 7-segment display being used.
+ * @brief This file has all the functions required to properly write in the 4x7-segment display being used (LTC-2623G)
  * The digits and segments are being controlled by two daisy chained shift registers
  * @version 0.1
  * @date 2022-03-27
@@ -36,6 +36,11 @@ const uint16_t D2 = 0b0000000000001000;
 const uint16_t D3 = 0b0000000000000100;
 const uint16_t D4 = 0b0000000000000010;
 const uint16_t L1 = 0b0000010000000000;
+
+const uint16_t REFRESH = 280;
+const float UPDATE_TIME = 1000 / REFRESH;
+const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
+
 void setup();
 
 /**
@@ -54,20 +59,6 @@ uint16_t getDigitPosition(const uint8_t digit);
 
 uint16_t getDigit(const uint8_t num);
 
-void drawNumbers(const uint8_t* numberArr, uint8_t size, const bool clkDiv);
-/**
- * @brief Draws a number into the specified digit position
- *
- * @param number
- * @param digit - position [0,4]
- */
-void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this useful at all?
-
-inline void toggleEditMode();
-
-inline void toggleScreenPower();
-
-inline void toggleClockDivider();
 /**
  * @brief Writes the number array on the display. Left most value goes to the left-most
  * position of the display. If size > 4, it draws the first 4 values
@@ -76,4 +67,23 @@ inline void toggleClockDivider();
  * @param size - [1,n] - size of the given array
  * @param clkDiv - Enables the clock divider in the display
  */
-}  // namespace timeDisplay
+
+void drawNumbers(const uint8_t* numberArr);
+
+/**
+ * @brief Draws a number into the specified digit position
+ *
+ * @param number
+ * @param digit - position [0,4]
+ */
+void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this useful at all?
+
+void update(int currentTime);
+
+inline void toggleEditMode();
+
+inline void toggleScreenPower();
+
+inline void toggleClockDivider();
+
+};  // namespace timeDisplay
