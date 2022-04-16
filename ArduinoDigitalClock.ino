@@ -8,9 +8,8 @@ uint8_t timeArr[SIZE] = {0};
 void setup() {
     timeDisplay::setup();
     mcpRtc::setup();
-    // controls::setup();
+    controls::setup();
     Serial.begin(9600);  // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
-    // Serial.print(getnum());
 }
 
 void loop() {
@@ -22,4 +21,5 @@ void loop() {
 void updateTimers() {
     int currentTime = millis();
     timeDisplay::update(currentTime);  // TimeDisplay update
+    controls::update(currentTime);
 }

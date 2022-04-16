@@ -37,7 +37,7 @@ const uint16_t D3 = 0b0000000000000100;
 const uint16_t D4 = 0b0000000000000010;
 const uint16_t L1 = 0b0000010000000000;
 
-const uint16_t REFRESH = 280;
+const uint16_t REFRESH = 260;
 const float UPDATE_TIME = 1000 / REFRESH;
 const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 

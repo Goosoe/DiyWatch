@@ -8,13 +8,15 @@ namespace controls {
 const uint8_t BUTTON_ONE = 11;
 const uint8_t BUTTON_TWO = 12;
 
-// enum COMMANDS { BUTTON_ONE_PRESS,
-//                 BUTTON_TWO_PRESS,
-//                 BUTTON_ONE_HOLD,
-//                 BUTTON_TWO_HOLD,
-//                 NONE };
+const uint16_t REFRESH = 1;
+const float UPDATE_TIME = 1000 / REFRESH;
 
 void setup();
+/**
+ * for debug purposes - prints the input info
+ */
+void printInputs();
+void update(int currentTime);
 };  // namespace controls
 
 // Serial.print("Button one: ");
