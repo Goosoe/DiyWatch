@@ -8,18 +8,27 @@ namespace controls {
 const uint8_t BUTTON_ONE = 11;
 const uint8_t BUTTON_TWO = 12;
 
-const uint16_t REFRESH = 1;
+const uint16_t REFRESH = 250;  // updates every REFRESH ms
 const float UPDATE_TIME = 1000 / REFRESH;
+
+enum COMMAND { NONE,
+               B1_PRESS,
+               B2_PRESS,
+               B1_HOLD,
+               B2_HOLD
+};
+struct COMMAND_LIST {
+    COMMAND b1;
+    COMMAND b2;
+};
 
 void setup();
 /**
  * for debug purposes - prints the input info
  */
 void printInputs();
-void update(int currentTime);
-};  // namespace controls
 
-// Serial.print("Button one: ");
-// Serial.println(digitalRead(BUTTON_ONE));
-// Serial.print("Button two: ");
-// Serial.println(digitalRead(BUTTON_TWO));
+void update(int currentTime);
+
+COMMAND_LIST getInput();
+};  // namespace controls

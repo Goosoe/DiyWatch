@@ -37,7 +37,7 @@ const uint16_t D3 = 0b0000000000000100;
 const uint16_t D4 = 0b0000000000000010;
 const uint16_t L1 = 0b0000010000000000;
 
-const uint16_t REFRESH = 260;
+const uint16_t REFRESH = 260;  // updates every REFRESH ms
 const float UPDATE_TIME = 1000 / REFRESH;
 const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 
@@ -67,7 +67,6 @@ uint16_t getDigit(const uint8_t num);
  * @param size - [1,n] - size of the given array
  * @param clkDiv - Enables the clock divider in the display
  */
-
 void drawNumbers(const uint8_t* numberArr);
 
 /**
