@@ -97,11 +97,12 @@ void update(int currentTime) {
     if (!clkDiv) {
         moduloDiv--;
     }
-    if (currentTime - lastUpdate >= UPDATE_TIME) {
-        previousRow = row;
-        row = (row + 1) % moduloDiv;
-        lastUpdate = currentTime;
+    if (currentTime - lastUpdate < UPDATE_TIME) {
+        return;
     }
+    previousRow = row;
+    row = (row + 1) % moduloDiv;
+    lastUpdate = currentTime;
 }
 
 inline void toggleEditMode() { editMode = !editMode; }

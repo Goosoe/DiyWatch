@@ -16,10 +16,15 @@ void loop() {
     updateTimers();
     mcpRtc::getTime(timeArr, SIZE);
     timeDisplay::drawNumbers(timeArr);
+    
 }
 
 void updateTimers() {
     int currentTime = millis();
     timeDisplay::update(currentTime);  // TimeDisplay update
-    controls::update(currentTime);
+    controls::update(currentTime, &test);
+}
+
+void test(controls::COMMAND_LIST cl){
+    Serial.println("aaa");
 }
