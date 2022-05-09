@@ -25,6 +25,8 @@ void updateTimers() {
     controls::update(currentTime, &test);
 }
 
-void test(controls::COMMAND_LIST cl){
-    Serial.println("aaa");
+void test(controls::COMMAND comm){
+    Serial.print("===\nButton command:");
+    Serial.println(comm);
+    Serial.println("===");
 }

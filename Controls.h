@@ -14,13 +14,9 @@ const float LONG_PRESS_TIME = 750;
 
 enum COMMAND { NONE,
                B1_PRESS,
-               B2_PRESS,
                B1_HOLD,
+               B2_PRESS,
                B2_HOLD
-};
-struct COMMAND_LIST {
-    COMMAND b1;
-    COMMAND b2;
 };
 
 void setup();
@@ -29,7 +25,7 @@ void setup();
  */
 void printInputs();
 
-void update(int currentTime, void(*observer)(COMMAND_LIST));
+void update(int currentTime, void(*observer)(COMMAND));
 
 // COMMAND_LIST getInput();
 };  // namespace controls
