@@ -21,6 +21,10 @@ void setup() {
 
 //TODO: remove prints
 void update(int currentTime, void(*observer)(COMMAND)) {
+    if(currentTime <= lastUpdate){      // Saves from the currentTime eventual overflow
+        lastUpdate = currentTime;
+    }
+
     uint16_t timePassed = currentTime - lastUpdate;
     bool isUpdated = false;
     bool holdLock = false;
@@ -73,13 +77,4 @@ void update(int currentTime, void(*observer)(COMMAND)) {
     }
     // getInput(); //TODO: DEBUG remove after testing
 }
-
-// COMMAND_LIST getInput() {
-//     COMMAND_LIST cl = COMMAND_LIST{
-//         commandList.b1,
-//         commandList.b2};
-//     commandList.b1 = COMMAND::NONE;
-//     commandList.b2 = COMMAND::NONE;
-//     return cl;
-// }
 };  // namespace controls

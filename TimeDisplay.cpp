@@ -1,17 +1,22 @@
 #include "TimeDisplay.h"
 
 #include <Arduino.h>
-
+#include "Util.h"
 namespace timeDisplay {
 
 // TODO: use bits instead of bools. Research must be made
+int lastUpdate = 0;  // time in ms
+int lastBlink = 0;   // time in ms
+
+uint8_t row = 0;  // current row to draw
+uint8_t previousRow = 0;
+uint16_t previousByteValue = 0;
+
+uint8_t editableDigits = 0;  // 0 = hours digits, 1 = minutes digits TODO: Switch this to Screen Controller
 bool screenOn = true;
-bool editMode = false;
 bool clkDiv = true;
 
-int lastUpdate = 0;  // time in ms
-int row = 0;         // current row to draw
-int previousRow = 0;
+bool blink = false;
 
 void setup() {
     // prepare Shift Registers
@@ -24,6 +29,7 @@ void drawNumbers(const uint8_t* numberArr) {
     if (previousRow == row) {
         return;
     }
+
     // TODO: there must be a way to upgrade the if/else
     if (row != DISPLAY_DIGITS - 1) {
         drawNumber(numberArr[row], row);
@@ -33,13 +39,36 @@ void drawNumbers(const uint8_t* numberArr) {
 }
 
 void drawNumber(const uint8_t number, const uint8_t digit) {
-    uint16_t byteValue = getDigit(number) + getDigitPosition(digit);
+    uint16_t byteValue = 0;
+    if (screenOn) {
+        if (blink) {
+            switch (editableDigits) {
+                case 0:  // hours digits
+                    if (digit == 0 || digit == 1) {
+                        return;
+                    }
+                    break;
+                case 1:  // hours digits
+                    if (digit == 2 || digit == 3) {
+                        return;
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        byteValue = getDigit(number) + getDigitPosition(digit);
+    }
+    if (previousByteValue == byteValue) {
+        return;
+    }
     digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
     shiftOut(DS, SHCP, LSBFIRST, byteValue);
     shiftOut(DS, SHCP, LSBFIRST, byteValue >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
 
     digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
+    previousByteValue = byteValue;
 }
 
 uint16_t getDigit(const uint8_t num) {
@@ -92,7 +121,11 @@ uint16_t getDigitPosition(const uint8_t digit) {
     }
 }
 
-void update(int currentTime) {
+void update(int currentTime, stateUtil::MODE mode) {
+    if (currentTime <= lastUpdate) {  // Saves from the currentTime eventual overflow
+        lastUpdate = currentTime;
+    }
+
     uint8_t moduloDiv = DISPLAY_DIGITS;
     if (!clkDiv) {
         moduloDiv--;
@@ -100,15 +133,39 @@ void update(int currentTime) {
     if (currentTime - lastUpdate < UPDATE_TIME) {
         return;
     }
+    if (stateUtil::MODE::READ == mode) {
+        // setScreenPower(true);
+        setBlink(false);
+    } else if (stateUtil::MODE::EDIT == mode) {
+        if (currentTime - lastBlink > BLINK_TIMER) {
+            setBlink(!blink);
+            // setScreenPower(!screenOn);
+            lastBlink = currentTime;
+        }
+    }
     previousRow = row;
     row = (row + 1) % moduloDiv;
     lastUpdate = currentTime;
 }
 
-inline void toggleEditMode() { editMode = !editMode; }
+void setScreenPower(bool on) {
+    if (on != screenOn) {
+        screenOn = on;
+    }
+}
 
-inline void toggleScreenPower() { screenOn = !screenOn; }
+void setBlink(bool on) {
+    if (on != blink) {
+        blink = on;
+    }
+}
 
-inline void toggleClockDivider() { clkDiv = !clkDiv; }
+void toggleClockDivider() {
+     clkDiv = !clkDiv; 
+}
 
+void setEditableField(uint8_t field) {
+    editableDigits = field; 
+
+}
 };  // namespace timeDisplay

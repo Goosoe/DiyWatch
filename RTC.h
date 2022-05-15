@@ -5,8 +5,6 @@
  * MCP7940 I2C comm library
  * This library is by far the most complete and was created so I could have a better understanding
  * of I2C and RTC IC's.
- * @version 0.1
- * @date 2022-03-19
  * @copyright Copyright (c) 2022
  */
 #pragma once

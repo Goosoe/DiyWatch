@@ -1,5 +1,4 @@
 
-// press or hold is declared if the button was released or not in x time
 #pragma once
 #include <stdint.h>
 

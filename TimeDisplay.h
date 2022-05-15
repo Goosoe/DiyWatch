@@ -3,8 +3,6 @@
  * @author Goosoe
  * @brief This file has all the functions required to properly write in the 4x7-segment display being used (LTC-2623G)
  * The digits and segments are being controlled by two daisy chained shift registers
- * @version 0.1
- * @date 2022-03-27
  *
  * @copyright Copyright (c) 2022
  *
@@ -12,8 +10,9 @@
 
 #pragma once
 #include <stdint.h>
-namespace timeDisplay {
+#include "Util.h"
 
+namespace timeDisplay {
 const uint8_t DS = 8;
 const uint8_t STCP = 9;
 const uint8_t SHCP = 10;
@@ -39,6 +38,7 @@ const uint16_t L1 = 0b0000010000000000;
 
 const uint16_t REFRESH = 260;  // updates every REFRESH ms
 const float UPDATE_TIME = 1000 / REFRESH;
+const uint16_t BLINK_TIMER = 500;
 const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 
 void setup();
@@ -77,12 +77,14 @@ void drawNumbers(const uint8_t* numberArr);
  */
 void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this useful at all?
 
-void update(int currentTime);
+void update(const int currentTime, const stateUtil::MODE mode);
 
-inline void toggleEditMode();
+void setScreenPower(const bool on);
 
-inline void toggleScreenPower();
+void setBlink(const bool on);
 
-inline void toggleClockDivider();
+void setEditableField(const uint8_t field);
+
+// inline void toggleClockDivider();
 
 };  // namespace timeDisplay
