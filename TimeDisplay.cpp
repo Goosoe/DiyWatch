@@ -33,7 +33,8 @@ void drawNumbers(const uint8_t* numberArr) {
     // TODO: there must be a way to upgrade the if/else
     if (row != DISPLAY_DIGITS - 1) {
         drawNumber(numberArr[row], row);
-    } else {  // draw clockDivider
+    }
+    else {  // draw clockDivider
         drawNumber(10, row);
     }
 }
@@ -43,18 +44,18 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
     if (screenOn) {
         if (blink) {
             switch (editableDigits) {
-                case 0:  // hours digits
-                    if (digit == 0 || digit == 1) {
-                        return;
-                    }
-                    break;
-                case 1:  // hours digits
-                    if (digit == 2 || digit == 3) {
-                        return;
-                    }
-                    break;
-                default:
-                    break;
+            case 0:  // hours digits
+                if (digit == 0 || digit == 1) {
+                    return;
+                }
+                break;
+            case 1:  // hours digits
+                if (digit == 2 || digit == 3) {
+                    return;
+                }
+                break;
+            default:
+                break;
             }
         }
         byteValue = getDigit(number) + getDigitPosition(digit);
@@ -73,30 +74,30 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
 
 uint16_t getDigit(const uint8_t num) {
     switch (num) {
-        case 0:
-            return ZERO;
-        case 1:
-            return ONE;
-        case 2:
-            return TWO;
-        case 3:
-            return THREE;
-        case 4:
-            return FOUR;
-        case 5:
-            return FIVE;
-        case 6:
-            return SIX;
-        case 7:
-            return SEVEN;
-        case 8:
-            return EIGHT;
-        case 9:
-            return NINE;
-        case 10:
-            return CLOCK_DIVIDER;
-        default:
-            return 0;
+    case 0:
+        return ZERO;
+    case 1:
+        return ONE;
+    case 2:
+        return TWO;
+    case 3:
+        return THREE;
+    case 4:
+        return FOUR;
+    case 5:
+        return FIVE;
+    case 6:
+        return SIX;
+    case 7:
+        return SEVEN;
+    case 8:
+        return EIGHT;
+    case 9:
+        return NINE;
+    case 10:
+        return CLOCK_DIVIDER;
+    default:
+        return 0;
     }
 }
 
@@ -106,18 +107,18 @@ uint16_t getDigitPosition(const uint8_t digit) {
     }
 
     switch (digit) {
-        case 0:
-            return D1;
-        case 1:
-            return D2;
-        case 2:
-            return D3;
-        case 3:
-            return D4;
-        case 4:
-            return L1;
-        default:
-            return D1;
+    case 0:
+        return D1;
+    case 1:
+        return D2;
+    case 2:
+        return D3;
+    case 3:
+        return D4;
+    case 4:
+        return L1;
+    default:
+        return D1;
     }
 }
 
@@ -136,7 +137,8 @@ void update(int currentTime, stateUtil::MODE mode) {
     if (stateUtil::MODE::READ == mode) {
         // setScreenPower(true);
         setBlink(false);
-    } else if (stateUtil::MODE::EDIT == mode) {
+    }
+    else if (stateUtil::MODE::EDIT == mode) {
         if (currentTime - lastBlink > BLINK_TIMER) {
             setBlink(!blink);
             // setScreenPower(!screenOn);
@@ -161,11 +163,10 @@ void setBlink(bool on) {
 }
 
 void toggleClockDivider() {
-     clkDiv = !clkDiv; 
+    clkDiv = !clkDiv;
 }
 
 void setEditableField(uint8_t field) {
-    editableDigits = field; 
-
+    editableDigits = field;
 }
 };  // namespace timeDisplay

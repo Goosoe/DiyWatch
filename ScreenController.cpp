@@ -2,27 +2,31 @@
 #include "TimeDisplay.h"
 #include "Util.h"
 
-namespace screenController{
-    void setup(){
-        timeDisplay::setup();
-    }
-    
-    void update(const int currentTime, const stateUtil::MODE mode){ //TODO: state mode must be specific to different modules
-        timeDisplay::update(currentTime, mode);
-    }
+namespace screenController {
+void setup() {
+    timeDisplay::setup();
+}
 
-    /**
-     * @brief Set the Editable Field object
-     * @param field 
-     */
-    void setEditableField(const uint8_t field){
-        if(field < 2){   //0 = hours, 1 = minutes
-            timeDisplay::setEditableField(field);
-        }
-    }
+void update(const int currentTime, const stateUtil::MODE mode) { //TODO: state mode must be specific to different modules
+    timeDisplay::update(currentTime, mode);
+}
 
-    void drawTime(const uint8_t* timeArr){
-        timeDisplay::drawNumbers(timeArr);
+/**
+ * @brief Set the Editable Field object
+ * @param field
+ */
+void setEditableField(const uint8_t field) {
+    if (field < 2) {   //0 = hours, 1 = minutes
+        timeDisplay::setEditableField(field);
     }
-    
+}
+
+void drawTime(const uint8_t* timeArr) {
+    timeDisplay::drawNumbers(timeArr);
+}
+
+void resetBlink() {
+    timeDisplay::setBlink(false);
+}
+
 } // namespace screenController

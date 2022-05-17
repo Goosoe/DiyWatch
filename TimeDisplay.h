@@ -85,6 +85,7 @@ void setBlink(const bool on);
 
 void setEditableField(const uint8_t field);
 
+
 // inline void toggleClockDivider();
 
 };  // namespace timeDisplay
