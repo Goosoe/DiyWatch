@@ -1,5 +1,4 @@
 
-// press or hold is declared if the button was released or not in x time
 #pragma once
 #include <stdint.h>
 
@@ -8,16 +7,31 @@ namespace controls {
 const uint8_t BUTTON_ONE = 11;
 const uint8_t BUTTON_TWO = 12;
 
-// enum COMMANDS { BUTTON_ONE_PRESS,
-//                 BUTTON_TWO_PRESS,
-//                 BUTTON_ONE_HOLD,
-//                 BUTTON_TWO_HOLD,
-//                 NONE };
+const uint16_t REFRESH = 250;  // updates every REFRESH ms
+const float UPDATE_TIME = 1000 / REFRESH;
+const float LONG_PRESS_TIME = 750;
 
+enum COMMAND {
+    NONE,
+    B1_PRESS,
+    B1_HOLD,
+    B2_PRESS,
+    B2_HOLD
+};
+
+/**
+ * @brief Setup.
+ * Must be called in the main setup
+ */
 void setup();
-};  // namespace controls
 
-// Serial.print("Button one: ");
-// Serial.println(digitalRead(BUTTON_ONE));
-// Serial.print("Button two: ");
-// Serial.println(digitalRead(BUTTON_TWO));
+/**
+ * @brief Checks for input values and invokes the observer function
+ *
+ * @param currentTime
+ * @param observer function to be invoked after checking for commands
+ */
+void update(int currentTime, void(*observer)(COMMAND));
+
+// COMMAND_LIST getInput();
+};  // namespace controls
