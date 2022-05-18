@@ -122,32 +122,35 @@ uint16_t getDigitPosition(const uint8_t digit) {
     }
 }
 
-void update(int currentTime, stateUtil::MODE mode) {
-    if (currentTime <= lastUpdate) {  // Saves from the currentTime eventual overflow
-        lastUpdate = currentTime;
+void update(int time, stateUtil::MODE mode) {
+    if (time <= lastUpdate) {  // Saves from the currentTime eventual overflow
+        lastUpdate = time;
     }
 
     uint8_t moduloDiv = DISPLAY_DIGITS;
     if (!clkDiv) {
         moduloDiv--;
     }
-    if (currentTime - lastUpdate < UPDATE_TIME) {
+    if (time - lastUpdate < UPDATE_TIME) {
         return;
     }
+
+
     if (stateUtil::MODE::READ == mode) {
         // setScreenPower(true);
-        setBlink(false);
+        if (blink) {
+            setBlink(false, time);
+        }
     }
     else if (stateUtil::MODE::EDIT == mode) {
-        if (currentTime - lastBlink > BLINK_TIMER) {
-            setBlink(!blink);
+        if (time - lastBlink > BLINK_TIMER) {
+            setBlink(!blink, time);
             // setScreenPower(!screenOn);
-            lastBlink = currentTime;
         }
     }
     previousRow = row;
     row = (row + 1) % moduloDiv;
-    lastUpdate = currentTime;
+    lastUpdate = time;
 }
 
 void setScreenPower(bool on) {
@@ -156,9 +159,12 @@ void setScreenPower(bool on) {
     }
 }
 
-void setBlink(bool on) {
+void setBlink(const bool on, const int currentTime) {
     if (on != blink) {
         blink = on;
+    }
+    if (currentTime) {
+        lastBlink = currentTime;
     }
 }
 

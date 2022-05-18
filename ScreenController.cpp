@@ -25,8 +25,8 @@ void drawTime(const uint8_t* timeArr) {
     timeDisplay::drawNumbers(timeArr);
 }
 
-void resetBlink() {
-    timeDisplay::setBlink(false);
+void resetBlink(const int currentTime) {
+    timeDisplay::setBlink(false, currentTime);
 }
 
 } // namespace screenController

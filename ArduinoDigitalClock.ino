@@ -48,6 +48,7 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::STATE::TIME == state) {
                 resetEditData();
                 screenController::setEditableField(currentEditField);
+                //TODO: set mode
             }
         }
         else if (stateUtil::MODE::EDIT == mode) {
@@ -70,7 +71,7 @@ void evalCommand(controls::COMMAND comm) {
                 default:
                     break;
                 }
-                screenController::resetBlink();
+                screenController::resetBlink(millis());
             }
         }
         break;
@@ -80,8 +81,8 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::MODE::READ == mode) {
                 //TODO:
             }
-            else if (stateUtil::MODE::EDIT == mode) {   //TODO: thread addhour & addminute 
-                switch (currentEditField) {
+            else if (stateUtil::MODE::EDIT == mode) {   //TODO: thread addhour & addminute?
+                switch (currentEditField) {     //TODO: Hold button is the same as press right nonw
                 case 0: // edit hour field
                     mcpRtc::addHour();
                     break;
@@ -90,7 +91,7 @@ void evalCommand(controls::COMMAND comm) {
                 default:
                     break;
                 }
-                screenController::resetBlink();
+                screenController::resetBlink(millis());
             }
         }
         break;

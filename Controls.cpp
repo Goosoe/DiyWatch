@@ -21,7 +21,7 @@ void setup() {
 
 //TODO: remove prints
 void update(int currentTime, void(*observer)(COMMAND)) {
-    if(currentTime <= lastUpdate){      // Saves from the currentTime eventual overflow
+    if (currentTime <= lastUpdate) {      // Saves from the currentTime eventual overflow
         lastUpdate = currentTime;
     }
 
@@ -36,14 +36,14 @@ void update(int currentTime, void(*observer)(COMMAND)) {
 
     if (!b1HoldLock && b1LastState == 1 && state == 1) {    //if the button is being pressed (Long press verification)
         b1PressTimer += timePassed;
-        if(b1PressTimer >= LONG_PRESS_TIME){
+        if (b1PressTimer >= LONG_PRESS_TIME) {
             b1HoldLock = true;
             comm = COMMAND::B1_HOLD;
             isUpdated = true;
         }
     }
-    else if(b1LastState == 1 && state == 0){    // button press
-         if(!b1HoldLock){ 
+    else if (b1LastState == 1 && state == 0) {    // button press
+        if (!b1HoldLock) {
             comm = COMMAND::B1_PRESS;
             isUpdated = true;
         }
@@ -53,16 +53,16 @@ void update(int currentTime, void(*observer)(COMMAND)) {
     b1LastState = state;
     state = digitalRead(BUTTON_TWO);
 
-    if (!b2HoldLock && b2LastState == 1 && state == 1 ) {    //if the button is being pressed (Long press verification)
+    if (!b2HoldLock && b2LastState == 1 && state == 1) {    //if the button is being pressed (Long press verification)
         b2PressTimer += timePassed;
-        if(b2PressTimer >= LONG_PRESS_TIME){
+        if (b2PressTimer >= LONG_PRESS_TIME) {
             comm = COMMAND::B2_HOLD;
             b2HoldLock = true;
             isUpdated = true;
         }
     }
-    else if(b2LastState == 1 && state == 0){    // button press
-         if(!b2HoldLock){ 
+    else if (b2LastState == 1 && state == 0) {    // button press
+        if (!b2HoldLock) {
             comm = COMMAND::B2_PRESS;
             isUpdated = true;
         }
@@ -72,9 +72,8 @@ void update(int currentTime, void(*observer)(COMMAND)) {
     b2LastState = state;
     lastUpdate = currentTime;
 
-    if(isUpdated){
+    if (isUpdated) {
         observer(comm);
     }
-    // getInput(); //TODO: DEBUG remove after testing
 }
 };  // namespace controls

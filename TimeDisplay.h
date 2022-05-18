@@ -38,9 +38,13 @@ const uint16_t L1 = 0b0000010000000000;
 
 const uint16_t REFRESH = 260;  // updates every REFRESH ms
 const float UPDATE_TIME = 1000 / REFRESH;
-const uint16_t BLINK_TIMER = 500;
+const uint16_t BLINK_TIMER = 600;
 const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 
+/**
+ * @brief Setup.
+ * Must be called in the main setup
+ */
 void setup();
 
 /**
@@ -77,12 +81,33 @@ void drawNumbers(const uint8_t* numberArr);
  */
 void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this useful at all?
 
-void update(const int currentTime, const stateUtil::MODE mode);
+/**
+ * @brief Updates the Timedisplay
+ *
+ * @param time current time
+ * @param mode current mode
+ */
+void update(const int time, const stateUtil::MODE mode);
 
+/**
+ * @brief Set the Screen Power
+ *
+ * @param on
+ */
 void setScreenPower(const bool on);
 
-void setBlink(const bool on);
+/**
+ * @brief Set the Blink variable
+ *
+ * @param on
+ */
+void setBlink(const bool on, const int currentTime = 0);
 
+/**
+ * @brief Sets the Editable Field. This value is used to know which of the digits are supposed to be edited
+ *
+ * @param field must be [0,1]
+ */
 void setEditableField(const uint8_t field);
 
 

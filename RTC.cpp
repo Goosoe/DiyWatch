@@ -11,7 +11,7 @@ void setup() {
     writeBit(HOUR_REG, 6, 0);   //hour format (0 = 24h, 1 = 12h)
 }
 
-uint8_t getTime(uint8_t* arr, uint8_t size) {
+uint8_t getTime(uint8_t* arr, const uint8_t size) {
     if (size != 4 && size != 6) {
         return 0;
     }
@@ -39,7 +39,7 @@ uint8_t getTime(uint8_t* arr, uint8_t size) {
     return 1;
 }
 
-uint8_t readByte(uint8_t address) {
+uint8_t readByte(const uint8_t address) {
     byte val = 0;
     Wire.beginTransmission(RTC_ADRESS);            // queues bytes to be sent to a slave with the given register
     Wire.write(address);                           // Request the seconds register
@@ -54,7 +54,7 @@ uint8_t readByte(uint8_t address) {
     return val;
 }
 
-void writeByte(uint8_t address, uint8_t value) {
+void writeByte(const uint8_t address, const uint8_t value) {
     Wire.beginTransmission(RTC_ADRESS);  // Address the I2C device
     Wire.write(address);                 // Send register address to read from
     Wire.write(value);                   // write the data

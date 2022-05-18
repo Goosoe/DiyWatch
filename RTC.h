@@ -25,7 +25,7 @@ const uint8_t CONTROL_REG = 0x07;
 const uint8_t OSC_TRIM_REG = 0x08;
 
 /**
- * @brief Setup of this specific RTC.
+ * @brief Setup.
  * Must be called in the main setup
  */
 void setup();
@@ -35,14 +35,14 @@ void setup();
  * @param address address to read
  * @return uint8_t byte info
  */
-uint8_t readByte(uint8_t address);
+uint8_t readByte(const uint8_t address);
 
 /**
  * @brief Writes a byte in address
  * @param address adress to read
  * @param value byte
  */
-void writeByte(uint8_t address, uint8_t value);
+void writeByte(const uint8_t address, const uint8_t value);
 
 /**
  * @brief Writes a bit in address
@@ -59,7 +59,7 @@ void writeBit(const uint8_t address, const uint8_t pos, const uint8_t bit);
  * @param size Size of the array to send. if 4 - sends hhmm if 6 hhmmss
  * @return 1 if success
  */
-uint8_t getTime(uint8_t* arr, uint8_t size);
+uint8_t getTime(uint8_t* arr, const uint8_t size);
 
 /**
  * @brief Adds an hour to the RTC register.
