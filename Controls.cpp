@@ -20,12 +20,12 @@ void setup() {
 
 
 //TODO: remove prints
-void update(int currentTime, void(*observer)(COMMAND)) {
-    if (currentTime <= lastUpdate) {      // Saves from the currentTime eventual overflow
-        lastUpdate = currentTime;
+void update(const uint16_t time, void(*observer)(COMMAND)) {
+    if (time < lastUpdate) {      // Saves from the time eventual overflow
+        lastUpdate = time;
     }
 
-    uint16_t timePassed = currentTime - lastUpdate;
+    uint16_t timePassed = time - lastUpdate;
     bool isUpdated = false;
     bool holdLock = false;
     COMMAND comm = COMMAND::NONE;
@@ -70,7 +70,7 @@ void update(int currentTime, void(*observer)(COMMAND)) {
         b2PressTimer = 0;
     }
     b2LastState = state;
-    lastUpdate = currentTime;
+    lastUpdate = time;
 
     if (isUpdated) {
         observer(comm);

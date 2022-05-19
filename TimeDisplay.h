@@ -87,7 +87,7 @@ void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this us
  * @param time current time
  * @param mode current mode
  */
-void update(const int time, const stateUtil::MODE mode);
+void update(const uint16_t time, const stateUtil::MODE mode);
 
 /**
  * @brief Set the Screen Power
@@ -101,7 +101,7 @@ void setScreenPower(const bool on);
  *
  * @param on
  */
-void setBlink(const bool on, const int currentTime = 0);
+void setBlink(const bool on, const int time = 0);
 
 /**
  * @brief Sets the Editable Field. This value is used to know which of the digits are supposed to be edited

@@ -1,7 +1,7 @@
 /**
 * @file ScreenController.h
 * @author Goosoe
-* @brief This header has an API to control all the displays for the clock
+* @brief This library has the API to control all the displays for the clock
 * @copyright Copyright (c) 2022
 *
 */
@@ -24,7 +24,7 @@ void setup();
  * @param time current time
  * @param mode current mode
  */
-void update(const int currentTime, const stateUtil::MODE mode);
+void update(const uint16_t time, const stateUtil::MODE mode);
 
 /**
  * @brief Set the Editable Field in the correct screen
@@ -44,5 +44,5 @@ void drawTime(const uint8_t* timeArr);
  * @brief Stops the blink
  *
  */
-void resetBlink(const int currentTime = 0);
+void resetBlink(const uint16_t time = 0);
 };  // namespace screenController

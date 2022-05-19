@@ -7,8 +7,8 @@ void setup() {
     timeDisplay::setup();
 }
 
-void update(const int currentTime, const stateUtil::MODE mode) { //TODO: state mode must be specific to different modules
-    timeDisplay::update(currentTime, mode);
+void update(const uint16_t time, const stateUtil::MODE mode) { //TODO: state mode must be specific to different modules
+    timeDisplay::update(time, mode);
 }
 
 /**
@@ -25,8 +25,8 @@ void drawTime(const uint8_t* timeArr) {
     timeDisplay::drawNumbers(timeArr);
 }
 
-void resetBlink(const int currentTime) {
-    timeDisplay::setBlink(false, currentTime);
+void resetBlink(const uint16_t time) {
+    timeDisplay::setBlink(false, time);
 }
 
 } // namespace screenController

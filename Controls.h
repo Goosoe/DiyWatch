@@ -28,10 +28,10 @@ void setup();
 /**
  * @brief Checks for input values and invokes the observer function
  *
- * @param currentTime
+ * @param time
  * @param observer function to be invoked after checking for commands
  */
-void update(int currentTime, void(*observer)(COMMAND));
+void update(const uint16_t time, void(*observer)(COMMAND));
 
 // COMMAND_LIST getInput();
 };  // namespace controls

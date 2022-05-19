@@ -2,6 +2,7 @@
 #include "RTC.h"
 #include "ScreenController.h"
 #include "Util.h"
+#include "Sensors.h"
 
 const uint8_t SIZE = 6;
 uint8_t timeArr[SIZE] = { 0 };
@@ -108,6 +109,7 @@ void setup() {
     screenController::setup();
     mcpRtc::setup();
     controls::setup();
+    sensors::setup();
     Serial.begin(9600); // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
 }
 
@@ -116,15 +118,19 @@ void setup() {
  */
 void loop() {
     updateComponents();
-    mcpRtc::getTime(timeArr, SIZE);
+    //TODO: add in the state machine? or make these functions be called over time
+    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
     screenController::drawTime(timeArr);
+    // sensors::getTemp(); //TODO: should be called every minute
+
 }
 
 /**
  * @brief Updates all the connected components
  */
 void updateComponents() {
-    int currentTime = millis();
-    screenController::update(currentTime, static_cast<stateUtil::MODE>(stateController::mode));
-    controls::update(currentTime, &stateController::evalCommand);
+    uint16_t time = millis();
+    screenController::update(time, static_cast<stateUtil::MODE>(stateController::mode));
+    controls::update(time, &stateController::evalCommand);
+    sensors::update(time);
 }
