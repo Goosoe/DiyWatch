@@ -5,8 +5,8 @@
 namespace timeDisplay {
 
 // TODO: use bits instead of bools. Research must be made
-uint16_t lastUpdate = 0;  // time in ms
-uint16_t lastBlink = 0;   // time in ms
+uint32_t lastUpdate = 0;  // time in ms
+uint32_t lastBlink = 0;   // time in ms
 
 uint8_t row = 0;  // current row to draw
 uint8_t previousRow = 0;
@@ -122,7 +122,7 @@ uint16_t getDigitPosition(const uint8_t digit) {
     }
 }
 
-void update(const uint16_t time, stateUtil::MODE mode) {
+void update(const uint32_t time, stateUtil::MODE mode) {
     if (time < lastUpdate) {  // Saves from the time eventual overflow
         lastUpdate = time;
     }

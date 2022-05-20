@@ -129,7 +129,7 @@ void loop() {
  * @brief Updates all the connected components
  */
 void updateComponents() {
-    uint16_t time = millis();
+    uint32_t time = millis();
     screenController::update(time, static_cast<stateUtil::MODE>(stateController::mode));
     controls::update(time, &stateController::evalCommand);
     sensors::update(time);

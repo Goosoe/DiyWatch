@@ -7,7 +7,7 @@ void setup() {
     timeDisplay::setup();
 }
 
-void update(const uint16_t time, const stateUtil::MODE mode) { //TODO: state mode must be specific to different modules
+void update(const uint32_t time, const stateUtil::MODE mode) { //TODO: state mode must be specific to different modules
     timeDisplay::update(time, mode);
 }
 

@@ -87,7 +87,7 @@ void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this us
  * @param time current time
  * @param mode current mode
  */
-void update(const uint16_t time, const stateUtil::MODE mode);
+void update(const uint32_t time, const stateUtil::MODE mode);
 
 /**
  * @brief Set the Screen Power

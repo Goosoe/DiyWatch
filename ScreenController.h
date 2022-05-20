@@ -24,7 +24,7 @@ void setup();
  * @param time current time
  * @param mode current mode
  */
-void update(const uint16_t time, const stateUtil::MODE mode);
+void update(const uint32_t time, const stateUtil::MODE mode);
 
 /**
  * @brief Set the Editable Field in the correct screen

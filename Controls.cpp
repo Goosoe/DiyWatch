@@ -20,12 +20,12 @@ void setup() {
 
 
 //TODO: remove prints
-void update(const uint16_t time, void(*observer)(COMMAND)) {
+void update(const uint32_t time, void(*observer)(COMMAND)) {
     if (time < lastUpdate) {      // Saves from the time eventual overflow
         lastUpdate = time;
     }
 
-    uint16_t timePassed = time - lastUpdate;
+    uint32_t timePassed = time - lastUpdate;
     bool isUpdated = false;
     bool holdLock = false;
     COMMAND comm = COMMAND::NONE;
