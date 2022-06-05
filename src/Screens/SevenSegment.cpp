@@ -1,7 +1,7 @@
-#include "TimeDisplay.h"
+#include "SevenSegment.h""
 
 #include <Arduino.h>
-#include "Util.h"
+#include "../Util.h"
 namespace timeDisplay {
 
 // TODO: use bits instead of bools. Research must be made

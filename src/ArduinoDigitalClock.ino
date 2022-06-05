@@ -1,6 +1,6 @@
 #include "Controls.h"
 #include "RTC.h"
-#include "ScreenController.h"
+#include "Screens/ScreenController.h"
 #include "Util.h"
 #include "Sensors.h"
 

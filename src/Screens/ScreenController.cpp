@@ -1,6 +1,6 @@
 #include "ScreenController.h"
-#include "TimeDisplay.h"
-#include "Util.h"
+#include "SevenSegment.h"
+#include "../Util.h"
 
 namespace screenController {
 void setup() {
