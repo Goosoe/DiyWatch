@@ -10,7 +10,7 @@
 
 #pragma once
 #include <stdint.h>
-#include "Util.h"
+#include "../Util.h"
 
 namespace timeDisplay {
 const uint8_t DS = 8;

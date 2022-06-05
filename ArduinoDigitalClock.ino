@@ -1,8 +1,8 @@
-#include "Controls.h"
-#include "RTC.h"
-#include "Screens/ScreenController.h"
-#include "Util.h"
-#include "Sensors.h"
+#include "src/Controls.h"
+#include "src/RTC.h"
+#include "src/Screens/ScreenController.h"
+#include "src/Util.h"
+#include "src/Sensors.h"
 
 const uint8_t SIZE = 6;
 uint8_t timeArr[SIZE] = { 0 };
