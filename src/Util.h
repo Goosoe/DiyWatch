@@ -7,14 +7,14 @@
  *
  */
 #pragma once
-namespace stateUtil{
-enum MODE{
+namespace stateUtil {
+enum MODE {
     READ,
     EDIT
 
 };
 
-enum STATE{ 
+enum STATE {
     TIME,
     SENSORS,
     CHRONOMETER,

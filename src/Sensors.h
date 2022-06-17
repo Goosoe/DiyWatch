@@ -10,6 +10,7 @@
 namespace sensors {
 
 void setup();
+
 void update(const uint32_t time);
 
 int8_t getTemp();

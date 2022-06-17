@@ -11,18 +11,6 @@
 #include <stdint.h>
 
 namespace mcpRtc {
-const uint8_t RTC_ADRESS = 0x6F;  // RTC I2C adress
-
-/* TIME-KEEPING REGISTERS (Bytes)*/
-const uint8_t SEC_REG = 0x00;
-const uint8_t MIN_REG = 0x01;
-const uint8_t HOUR_REG = 0x02;
-const uint8_t WEEK_DAY_REG = 0x03;
-const uint8_t DATE_REG = 0x04;
-const uint8_t MONTH_REG = 0x05;
-const uint8_t YEAR_REG = 0x06;
-const uint8_t CONTROL_REG = 0x07;
-const uint8_t OSC_TRIM_REG = 0x08;
 
 /**
  * @brief Setup.

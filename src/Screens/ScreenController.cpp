@@ -1,14 +1,18 @@
 #include "ScreenController.h"
 #include "SevenSegment.h"
+#include "LedArray.h"
 #include "../Util.h"
 
 namespace screenController {
+
 void setup() {
     timeDisplay::setup();
+    ledArray::setup();
 }
 
 void update(const uint32_t time, const stateUtil::MODE mode) { //TODO: state mode must be specific to different modules
     timeDisplay::update(time, mode);
+    ledArray::update(time, mode);
 }
 
 /**

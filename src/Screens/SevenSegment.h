@@ -13,33 +13,6 @@
 #include "../Util.h"
 
 namespace timeDisplay {
-const uint8_t DS = 8;
-const uint8_t STCP = 9;
-const uint8_t SHCP = 10;
-// SEGMENT SELECTOR - HIGH IS OFF
-const uint16_t ZERO = 0b0000000000010000;
-const uint16_t ONE = 0b0100100001110000;
-const uint16_t TWO = 0b0001000000100000;
-const uint16_t THREE = 0b0000000001100000;
-const uint16_t FOUR = 0b0100100001000000;
-const uint16_t FIVE = 0b0010000001000000;
-const uint16_t SIX = 0b0010000000000000;
-const uint16_t SEVEN = 0b0000100001110000;
-const uint16_t EIGHT = 0b0000000000000000;
-const uint16_t NINE = 0b0000000001000000;
-const uint16_t CLOCK_DIVIDER = 0b0001000000000000;
-
-// DIGIT POSITION SELECTOR - LOW IS OFF
-const uint16_t D1 = 0b0000001000000000;
-const uint16_t D2 = 0b0000000000001000;
-const uint16_t D3 = 0b0000000000000100;
-const uint16_t D4 = 0b0000000000000010;
-const uint16_t L1 = 0b0000010000000000;
-
-const uint16_t REFRESH = 260;  // updates every REFRESH ms
-const float UPDATE_TIME = 1000 / REFRESH;
-const uint16_t BLINK_TIMER = 600;
-const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 
 /**
  * @brief Setup.
@@ -82,7 +55,7 @@ void drawNumbers(const uint8_t* numberArr);
 void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this useful at all?
 
 /**
- * @brief Updates the Timedisplay
+ * @brief Updates the seven segment display
  *
  * @param time current time
  * @param mode current mode
@@ -109,8 +82,4 @@ void setBlink(const bool on, const int time = 0);
  * @param field must be [0,1]
  */
 void setEditableField(const uint8_t field);
-
-
-// inline void toggleClockDivider();
-
 };  // namespace timeDisplay

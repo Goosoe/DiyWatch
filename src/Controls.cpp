@@ -5,6 +5,13 @@
 
 namespace controls {
 
+const uint8_t BUTTON_ONE = 11;
+const uint8_t BUTTON_TWO = 12;
+
+const uint16_t REFRESH = 250;  // updates every REFRESH ms
+const float UPDATE_TIME = 1000 / REFRESH;
+const float LONG_PRESS_TIME = 750;
+
 int lastUpdate = 0;       // time in ms
 int b1PressTimer = 0;  // 0 = off
 int b2PressTimer = 0;  // 0 = off

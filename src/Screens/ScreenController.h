@@ -11,6 +11,7 @@
 #include "../Util.h"
 
 namespace screenController {
+
 const uint8_t MAX_EDITABLE_FIELDS = 2;  //TODO: update when adding more displays
 
 /**

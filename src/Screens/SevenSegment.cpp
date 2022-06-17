@@ -4,7 +4,35 @@
 #include "../Util.h"
 namespace timeDisplay {
 
-// TODO: use bits instead of bools. Research must be made
+const uint8_t DS = 8;
+const uint8_t STCP = 9;
+const uint8_t SHCP = 10;
+const uint8_t BLOCK = 5;
+// SEGMENT SELECTOR - HIGH IS OFF
+const uint16_t ZERO = 0b0000000000010000;
+const uint16_t ONE = 0b0100100001110000;
+const uint16_t TWO = 0b0001000000100000;
+const uint16_t THREE = 0b0000000001100000;
+const uint16_t FOUR = 0b0100100001000000;
+const uint16_t FIVE = 0b0010000001000000;
+const uint16_t SIX = 0b0010000000000000;
+const uint16_t SEVEN = 0b0000100001110000;
+const uint16_t EIGHT = 0b0000000000000000;
+const uint16_t NINE = 0b0000000001000000;
+const uint16_t CLOCK_DIVIDER = 0b0001000000000000;
+
+// DIGIT POSITION SELECTOR - LOW IS OFF
+const uint16_t D1 = 0b0000001000000000;
+const uint16_t D2 = 0b0000000000001000;
+const uint16_t D3 = 0b0000000000000100;
+const uint16_t D4 = 0b0000000000000010;
+const uint16_t L1 = 0b0000010000000000;
+
+const uint16_t REFRESH = 260;  // nr of refreshes per sec
+const float UPDATE_TIME = 1000 / REFRESH;
+const uint16_t BLINK_TIMER = 600;
+const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
+
 uint32_t lastUpdate = 0;  // time in ms
 uint32_t lastBlink = 0;   // time in ms
 
@@ -23,6 +51,7 @@ void setup() {
     pinMode(DS, OUTPUT);
     pinMode(SHCP, OUTPUT);
     pinMode(STCP, OUTPUT);
+    pinMode(BLOCK, OUTPUT);
 }
 
 void drawNumbers(const uint8_t* numberArr) {
@@ -58,17 +87,19 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
                 break;
             }
         }
-        byteValue = getDigit(number) + getDigitPosition(digit);
+        byteValue = getDigit(number) | getDigitPosition(digit);
     }
     if (previousByteValue == byteValue) {
         return;
     }
+    digitalWrite(BLOCK, LOW);
     digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
     shiftOut(DS, SHCP, LSBFIRST, byteValue);
     shiftOut(DS, SHCP, LSBFIRST, byteValue >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
 
     digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
+    digitalWrite(BLOCK, HIGH);
     previousByteValue = byteValue;
 }
 
@@ -122,7 +153,7 @@ uint16_t getDigitPosition(const uint8_t digit) {
     }
 }
 
-void update(const uint32_t time, stateUtil::MODE mode) {
+void update(const uint32_t time, const stateUtil::MODE mode) {
     if (time < lastUpdate) {  // Saves from the time eventual overflow
         lastUpdate = time;
     }
@@ -153,7 +184,7 @@ void update(const uint32_t time, stateUtil::MODE mode) {
     lastUpdate = time;
 }
 
-void setScreenPower(bool on) {
+void setScreenPower(const bool on) {
     if (on != screenOn) {
         screenOn = on;
     }
@@ -172,7 +203,7 @@ void toggleClockDivider() {
     clkDiv = !clkDiv;
 }
 
-void setEditableField(uint8_t field) {
+void setEditableField(const uint8_t field) {
     editableDigits = field;
 }
 };  // namespace timeDisplay
