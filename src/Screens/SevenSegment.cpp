@@ -7,7 +7,8 @@ namespace timeDisplay {
 const uint8_t DS = 8;
 const uint8_t STCP = 9;
 const uint8_t SHCP = 10;
-const uint8_t BLOCK = 5;
+//controls the clock data to go into the registers - HIGH = OPEN
+const uint8_t CLOCK_CONTROLLER_PIN = 5;
 // SEGMENT SELECTOR - HIGH IS OFF
 const uint16_t ZERO = 0b0000000000010000;
 const uint16_t ONE = 0b0100100001110000;
@@ -51,7 +52,9 @@ void setup() {
     pinMode(DS, OUTPUT);
     pinMode(SHCP, OUTPUT);
     pinMode(STCP, OUTPUT);
-    pinMode(BLOCK, OUTPUT);
+    pinMode(CLOCK_CONTROLLER_PIN, OUTPUT);
+    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
+
 }
 
 void drawNumbers(const uint8_t* numberArr) {
@@ -92,15 +95,16 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
     if (previousByteValue == byteValue) {
         return;
     }
-    digitalWrite(BLOCK, LOW);
+    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
     digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
     shiftOut(DS, SHCP, LSBFIRST, byteValue);
     shiftOut(DS, SHCP, LSBFIRST, byteValue >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
 
     digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
-    digitalWrite(BLOCK, HIGH);
+    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
     previousByteValue = byteValue;
+
 }
 
 uint16_t getDigit(const uint8_t num) {

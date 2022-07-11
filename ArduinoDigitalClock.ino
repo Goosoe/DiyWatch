@@ -29,7 +29,7 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B1_PRESS:
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                resetEditData();
+                // resetEditData();
                 // TODO: uncomment when we want to switch between modes
                 //     state += 1 % (STATE::ALARM + 1); //USE LAST STATE OF THE ENUM
                 //     Serial.print("===\nNew State:");

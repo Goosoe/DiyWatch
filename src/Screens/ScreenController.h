@@ -14,6 +14,9 @@ namespace screenController {
 
 const uint8_t MAX_EDITABLE_FIELDS = 2;  //TODO: update when adding more displays
 
+// pins that control the NPN transistor that opens the clock to the specific display
+const uint8_t SS_REGISTER_CONTROLLER = 5;
+const uint8_t LA_REGISTER_CONTROLLER = 6;
 /**
  * @brief Setup.
  * Must be called in the main setup
