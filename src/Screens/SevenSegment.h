@@ -12,7 +12,7 @@
 #include <stdint.h>
 #include "../Util.h"
 
-namespace timeDisplay {
+namespace svnSeg {
 
 /**
  * @brief Setup.
@@ -60,7 +60,7 @@ void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this us
  * @param time current time
  * @param mode current mode
  */
-void update(const uint32_t time, const stateUtil::MODE mode);
+void update();
 
 /**
  * @brief Set the Screen Power
@@ -74,7 +74,7 @@ void setScreenPower(const bool on);
  *
  * @param on
  */
-void setBlink(const bool on, const int time = 0);
+void setBlink(const bool on);
 
 /**
  * @brief Sets the Editable Field. This value is used to know which of the digits are supposed to be edited
@@ -82,4 +82,4 @@ void setBlink(const bool on, const int time = 0);
  * @param field must be [0,1]
  */
 void setEditableField(const uint8_t field);
-};  // namespace timeDisplay
+};  // namespace svnSeg

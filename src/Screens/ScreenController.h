@@ -9,14 +9,13 @@
 #pragma once
 #include <stdint.h>
 #include "../Util.h"
+#include <string.h>
 
 namespace screenController {
 
 const uint8_t MAX_EDITABLE_FIELDS = 2;  //TODO: update when adding more displays
 
 // pins that control the NPN transistor that opens the clock to the specific display
-const uint8_t SS_REGISTER_CONTROLLER = 5;
-const uint8_t LA_REGISTER_CONTROLLER = 6;
 /**
  * @brief Setup.
  * Must be called in the main setup
@@ -28,25 +27,33 @@ void setup();
  * @param time current time
  * @param mode current mode
  */
-void update(const uint32_t time, const stateUtil::MODE mode);
+void update();
 
 /**
  * @brief Set the Editable Field in the correct screen
  *
  * @param field
  */
-void setEditableField(const uint8_t field); //TODO: MAKE ENUM
+uint8_t setEditableField(const uint8_t field); //TODO: MAKE ENUM
+
+uint8_t incrementEditField();  //TODO:docs
 
 /**
- * @brief Sends the time array (of size 4) to the respective screen to be drawn
+ * @brief Sends an array (of size 4) to the seven-segment screen to be drawn
  *
- * @param timeArr
+ * @param arr
  */
-void drawTime(const uint8_t* timeArr);
+void drawSS(const uint8_t* arr);
 
+/**
+ * @brief Sends a string (max size 30) to the LED Array screen to be drawn
+ *
+ * @param str
+ */
+void drawLA(const char* str);
 /**
  * @brief Stops the blink
  *
  */
-void resetBlink(const uint16_t time = 0);
+void setBlink(const bool on);
 };  // namespace screenController

@@ -2,7 +2,7 @@
 
 #include <Arduino.h>
 #include "../Util.h"
-namespace timeDisplay {
+namespace svnSeg {
 
 const uint8_t DS = 8;
 const uint8_t STCP = 9;
@@ -31,11 +31,13 @@ const uint16_t L1 = 0b0000010000000000;
 
 const uint16_t REFRESH = 260;  // nr of refreshes per sec
 const float UPDATE_TIME = 1000 / REFRESH;
-const uint16_t BLINK_TIMER = 600;
+const uint16_t BLINK_TIME = 600;
 const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 
 uint32_t lastUpdate = 0;  // time in ms
 uint32_t lastBlink = 0;   // time in ms
+bool blinkVal = false;   // time in ms
+
 
 uint8_t row = 0;  // current row to draw
 uint8_t previousRow = 0;
@@ -52,9 +54,9 @@ void setup() {
     pinMode(DS, OUTPUT);
     pinMode(SHCP, OUTPUT);
     pinMode(STCP, OUTPUT);
+    //prepare controller pin
     pinMode(CLOCK_CONTROLLER_PIN, OUTPUT);
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
-
 }
 
 void drawNumbers(const uint8_t* numberArr) {
@@ -73,25 +75,27 @@ void drawNumbers(const uint8_t* numberArr) {
 
 void drawNumber(const uint8_t number, const uint8_t digit) {
     uint16_t byteValue = 0;
-    if (screenOn) {
-        if (blink) {
-            switch (editableDigits) {
-            case 0:  // hours digits
-                if (digit == 0 || digit == 1) {
-                    return;
-                }
-                break;
-            case 1:  // hours digits
-                if (digit == 2 || digit == 3) {
-                    return;
-                }
-                break;
-            default:
-                break;
-            }
-        }
-        byteValue = getDigit(number) | getDigitPosition(digit);
+    if (!screenOn) {
+        return;
     }
+    if (blink && !blinkVal) {
+        switch (editableDigits) {
+        case 0:  // hours digits
+            if (digit == 0 || digit == 1) {
+                return;
+            }
+            break;
+        case 1:  // minutes digits
+            if (digit == 2 || digit == 3) {
+                return;
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    byteValue = getDigit(number) | getDigitPosition(digit);
+
     if (previousByteValue == byteValue) {
         return;
     }
@@ -104,7 +108,6 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
     digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
     previousByteValue = byteValue;
-
 }
 
 uint16_t getDigit(const uint8_t num) {
@@ -157,9 +160,13 @@ uint16_t getDigitPosition(const uint8_t digit) {
     }
 }
 
-void update(const uint32_t time, const stateUtil::MODE mode) {
+void update() {
+    const uint32_t time = millis();
     if (time < lastUpdate) {  // Saves from the time eventual overflow
         lastUpdate = time;
+    }
+    if (time < lastBlink) {  // Saves from the time eventual overflow
+        lastBlink = time;
     }
 
     uint8_t moduloDiv = DISPLAY_DIGITS;
@@ -169,38 +176,24 @@ void update(const uint32_t time, const stateUtil::MODE mode) {
     if (time - lastUpdate < UPDATE_TIME) {
         return;
     }
-
-
-    if (stateUtil::MODE::READ == mode) {
-        // setScreenPower(true);
-        if (blink) {
-            setBlink(false, time);
-        }
-    }
-    else if (stateUtil::MODE::EDIT == mode) {
-        if (time - lastBlink > BLINK_TIMER) {
-            setBlink(!blink, time);
-            // setScreenPower(!screenOn);
-        }
+    if (time - lastBlink > BLINK_TIME && blink) {
+        lastBlink = time;
+        blinkVal = !blinkVal;
     }
     previousRow = row;
     row = (row + 1) % moduloDiv;
+
     lastUpdate = time;
 }
 
 void setScreenPower(const bool on) {
-    if (on != screenOn) {
-        screenOn = on;
-    }
+    screenOn = on;
 }
 
-void setBlink(const bool on, const int time) {
-    if (on != blink) {
-        blink = on;
-    }
-    if (time) {
-        lastBlink = time;
-    }
+void setBlink(const bool on) {
+    blink = on;
+    blinkVal = true;
+    lastBlink = millis();
 }
 
 void toggleClockDivider() {
@@ -210,4 +203,4 @@ void toggleClockDivider() {
 void setEditableField(const uint8_t field) {
     editableDigits = field;
 }
-};  // namespace timeDisplay
+};  // namespace svnSeg

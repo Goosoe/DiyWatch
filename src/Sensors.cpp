@@ -29,8 +29,9 @@ void setup() {
     }
 }
 
-void update(const uint32_t time) {
-    if (time <= lastUpdate) {  // Saves from the time eventual overflow
+void update() {
+    const uint32_t time = millis();
+    if (time <= lastUpdate) {  // Saves from the eventual time overflow
         lastUpdate = time;
     }
     if (time - lastUpdate < UPDATE_TIME) {
@@ -38,14 +39,10 @@ void update(const uint32_t time) {
     }
     tempData.avgTemp[tempData.iter] = readTempSensor();
     tempData.iter = (tempData.iter + 1) % TEMP_ARR_SIZE;
-    //TODO: update sensor
-    // Print the temperature in the Serial Monitor:
-    Serial.println(getTemp());
     lastUpdate = time;
 }
 
 uint8_t readTempSensor() {
-
     int reading = analogRead(TEMP_SENSOR);
     float voltage = reading * (4750 / 1024.0);  // voltage being sent is around 4.75V and current is ~1.02 mA
     currentTemp = round(voltage / 10 - 273.15 - TEMP_CALIBRATION_OFFSET); //convert from K to C and remove 10 to counter the offset

@@ -3,20 +3,21 @@
 #include "src/Screens/ScreenController.h"
 #include "src/Util.h"
 #include "src/Sensors.h"
+#include <string.h>
 
 const uint8_t SIZE = 6;
 uint8_t timeArr[SIZE] = { 0 };
 
 namespace stateController {
 
-uint8_t state, mode = 0;
-uint8_t currentEditField = 0;
+uint8_t state, mode, currentEditField = 0;
+// uint8_t currentEditField = 0;
 
 /**
  * @brief resets all the variables used in the edit mode so it can start properly next time edit mode is entered in
  */
 void resetEditData() {
-    currentEditField = 0;
+    currentEditField = screenController::setEditableField(0);
 }
 
 /**
@@ -29,7 +30,7 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B1_PRESS:
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                // resetEditData();
+                resetEditData();
                 // TODO: uncomment when we want to switch between modes
                 //     state += 1 % (STATE::ALARM + 1); //USE LAST STATE OF THE ENUM
                 //     Serial.print("===\nNew State:");
@@ -37,8 +38,8 @@ void evalCommand(controls::COMMAND comm) {
                 //     Serial.println("===");
             }
             else if (stateUtil::MODE::EDIT == mode) {
-                currentEditField = (currentEditField + 1) % screenController::MAX_EDITABLE_FIELDS;
-                screenController::setEditableField(currentEditField);
+                currentEditField = screenController::incrementEditField();
+                screenController::setBlink(true);
             }
         }
         break;
@@ -48,12 +49,13 @@ void evalCommand(controls::COMMAND comm) {
             mode = stateUtil::MODE::EDIT;
             if (stateUtil::STATE::TIME == state) {
                 resetEditData();
-                screenController::setEditableField(currentEditField);
+                screenController::setBlink(true);
                 //TODO: set mode
             }
         }
         else if (stateUtil::MODE::EDIT == mode) {
             mode = stateUtil::MODE::READ;
+            screenController::setBlink(false);
         }
         break;
 
@@ -66,13 +68,14 @@ void evalCommand(controls::COMMAND comm) {
                 switch (currentEditField) {
                 case 0:
                     mcpRtc::addHour();
+                    screenController::setBlink(true);   //to update blink timer
                     break;
                 case 1:
                     mcpRtc::addMinute();
+                    screenController::setBlink(true);   //to update blink timer
                 default:
                     break;
                 }
-                screenController::resetBlink(millis());
             }
         }
         break;
@@ -92,7 +95,6 @@ void evalCommand(controls::COMMAND comm) {
                 default:
                     break;
                 }
-                screenController::resetBlink(millis());
             }
         }
         break;
@@ -120,7 +122,8 @@ void loop() {
     updateComponents();
     //TODO: add in the state machine? or make these functions be called over time
     mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
-    screenController::drawTime(timeArr);
+    screenController::drawSS(timeArr);
+    // screenController::drawLA(String(sensors::getTemp()).c_str());
     // sensors::getTemp(); //TODO: should be called every minute
 
 }
@@ -129,8 +132,7 @@ void loop() {
  * @brief Updates all the connected components
  */
 void updateComponents() {
-    uint32_t time = millis();
-    screenController::update(time, static_cast<stateUtil::MODE>(stateController::mode));
-    controls::update(time, &stateController::evalCommand);
-    sensors::update(time);
+    screenController::update();
+    controls::update(&stateController::evalCommand);
+    sensors::update();
 }

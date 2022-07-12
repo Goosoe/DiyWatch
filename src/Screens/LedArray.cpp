@@ -1,17 +1,21 @@
 #include <Arduino.h>
 #include "LedArray.h"
+#include "ArrayCharacters.h"
 #include "ScreenController.h"
-
-namespace ledArray {
+// #include "math.h"
+namespace ledArr {
 
 const uint8_t DS = 7;
 const uint8_t STCP = 9;
 const uint8_t SHCP = 10;
+//controls the clock data to go into the registers - HIGH = OPEN
 const uint8_t CLOCK_CONTROLLER_PIN = 6;
 
 const uint16_t REFRESH = 500;  // nr of updates per sec
 const float UPDATE_TIME = 1000 / REFRESH;
-// const uint16_t BLINK_TIMER = 600;
+const float UPDATE_BUFFER_TIME = 250; //ms
+
+// const uint16_t BLINK_TIME = 600;
 const uint8_t ROWS = 7;
 
 const uint16_t R_ONE = 0b0000000010111111;
@@ -28,87 +32,137 @@ const uint16_t C_THREE = 0b0001000000000000;
 const uint16_t C_FOUR = 0b0000100000000000;
 const uint16_t C_FIVE = 0b0000010000000000;
 
+const uint8_t BUFFER_MAX_CHARACTERS = 10 * arrayChar::SIZE_OF_CHARS;
+
 bool screenOn = true;
 
 uint32_t lastUpdate = 0;  // time in ms
 uint32_t lastBlink = 0;   // time in ms
+uint32_t lastBufferUpdate = 0;   // time in ms
+
 
 uint8_t row = 0;  // current row to draw
 uint8_t previousRow = 0;
+
+uint16_t charBuffer[BUFFER_MAX_CHARACTERS] = { 0 };
+int8_t bufferIdx = -ROWS;
+uint8_t bufferSize = 0;
+char* previousStr;
+
+uint16_t getBufferData(const uint8_t rowNum) {
+    int8_t idx = bufferIdx + rowNum;
+    if (idx < 0 || idx > bufferSize) {
+        return 0;
+    }
+    return charBuffer[idx];
+
+}
+
+/**
+ * @brief Get the byte value of row
+ * rowNum = [0,ROWS]
+ * @return uint16_t
+ */
+uint16_t getRow(const uint8_t rowNum) {
+    uint16_t byteVal = 0;
+    if (rowNum < 0 || rowNum > ROWS) {
+        return byteVal;
+    }
+    switch (row) {
+
+    case 1:
+        return R_TWO;
+        break;
+    case 2:
+        return R_THREE;
+        break;
+    case 3:
+        return R_FOUR;
+        break;
+    case 4:
+        return R_FIVE;
+        break;
+    case 5:
+        return R_SIX;
+        break;
+    case 6:
+        return R_SEVEN;
+        break;
+    default:
+        return R_ONE;
+        break;
+    }
+}
 
 void setup() {
     // prepare Shift Registers
     pinMode(DS, OUTPUT);
     pinMode(SHCP, OUTPUT);
     pinMode(STCP, OUTPUT);
-    // pinMode(BLOCK, OUTPUT);
+    //prepare controller pin
     pinMode(CLOCK_CONTROLLER_PIN, OUTPUT);
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
-    // /***/
-    // digitalWrite(BLOCK, LOW);
-    // digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
-    // uint16_t byteVal = C_ONE | C_TWO | R_ONE;
-    // shiftOut(DS, SHCP, LSBFIRST, byteVal);    //TODO: improve this SR
-    // shiftOut(DS, SHCP, LSBFIRST, byteVal >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
-
-    // digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
-    // digitalWrite(BLOCK, HIGH);  //LOCK THE WRITE
+    //TODO: experimental
+    draw("1");
 }
 
-void update(const uint32_t time, const stateUtil::MODE mode) {
-    if (time < lastUpdate) {  // Saves from the time eventual overflow
+void update() {
+    const uint32_t time = millis();
+    if (time < lastUpdate || time < lastBufferUpdate || time < lastBlink) {  // Saves from the time eventual overflow
         lastUpdate = time;
+        lastBufferUpdate = time;
+        lastBlink < time;
+    }
+
+    if (time - lastBufferUpdate > UPDATE_BUFFER_TIME) {
+        if (bufferIdx == bufferSize + ROWS - 1) {
+            bufferIdx = -ROWS;
+        }
+        else {
+            bufferIdx = (bufferIdx + 1) % (bufferSize + min(bufferSize, ROWS));
+        }
+        lastBufferUpdate = time;
     }
 
     if (time - lastUpdate < UPDATE_TIME) {
         return;
     }
-    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
 
+    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
     digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
-    uint16_t byteVal = C_ONE | C_TWO | C_THREE | C_FOUR | C_FIVE; //| R_ONE;
-    //todo: experimental
-    switch (previousRow) {
-    case 0:
-        byteVal |= R_ONE;
-        break;
-    case 1:
-        byteVal |= R_TWO;
-        break;
-    case 2:
-        byteVal |= R_THREE;
-        break;
-    case 3:
-        byteVal |= R_FOUR;
-        break;
-    case 4:
-        byteVal |= R_FIVE;
-        break;
-    case 5:
-        byteVal |= R_SIX;
-        break;
-    case 6:
-        byteVal |= R_SEVEN;
-        break;
-    }
-
+    uint16_t byteVal = getBufferData(row) | getRow(row); //| R_ONE;
 
     shiftOut(DS, SHCP, LSBFIRST, byteVal);    //TODO: improve this SR
     shiftOut(DS, SHCP, LSBFIRST, byteVal >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
 
     digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
-    previousRow = (previousRow + 1) % 7; //todo: magic number
+
+    previousRow = row;
+    row = (row + 1) % ROWS;
     lastUpdate = time;
 }
 
 
 void setScreenPower(const bool on) {
-    if (on != screenOn) {
-        screenOn = on;
-    }
+    screenOn = on;
+
 }
 
-}; //namespace ledArray
+void draw(const char* str) {
+    bufferIdx = -ROWS;
+    //TODO
+        //TODO: string must be < MAXBUFFERSIZE
+    charBuffer[0] = arrayChar::ONE[0];
+    charBuffer[1] = arrayChar::ONE[1];
+    charBuffer[2] = arrayChar::ONE[2];
+    charBuffer[3] = arrayChar::SPACE;
+    charBuffer[4] = arrayChar::TWO[0];
+    charBuffer[5] = arrayChar::TWO[1];
+    charBuffer[6] = arrayChar::TWO[2];
+    bufferSize = 7;
+
+}
+}; //namespace ledArr

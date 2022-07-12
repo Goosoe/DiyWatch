@@ -11,7 +11,7 @@
 #include <stdint.h>
 #include "../Util.h"
 
-namespace ledArray {
+namespace ledArr {
 /**
  * @brief Setup.
  * Must be called in the main setup
@@ -24,7 +24,7 @@ void setup();
  * @param time current time
  * @param mode current mode
  */
-void update(const uint32_t time, const stateUtil::MODE mode);
+void update();
 
 /**
  * @brief Set the Screen Power
@@ -33,5 +33,11 @@ void update(const uint32_t time, const stateUtil::MODE mode);
  */
 void setScreenPower(const bool on);
 
+/**
+ * @brief Wipes the buffer and adds the string
+ *
+ * @param str - to write in the buffer/LED Array
+ */
+void draw(const char* str);
 
-} // namespace ledArray
+} // namespace ledArr

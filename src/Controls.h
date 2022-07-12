@@ -24,7 +24,7 @@ void setup();
  * @param time
  * @param observer function to be invoked after checking for commands
  */
-void update(const uint32_t time, void(*observer)(COMMAND));
+void update(void(*observer)(COMMAND));
 
 // COMMAND_LIST getInput();
 };  // namespace controls
