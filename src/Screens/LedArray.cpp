@@ -32,7 +32,10 @@ const uint16_t C_THREE = 0b0001000000000000;
 const uint16_t C_FOUR = 0b0000100000000000;
 const uint16_t C_FIVE = 0b0000010000000000;
 
-const uint8_t BUFFER_MAX_CHARACTERS = 10 * arrayChar::SIZE_OF_CHARS;
+const uint8_t STRING_MAX_SIZE = 15; //counting with
+
+const uint8_t BUFFER_MAX_CHARACTERS = STRING_MAX_SIZE * arrayChar::SIZE_OF_CHARS + STRING_MAX_SIZE; //counting with
+
 
 bool screenOn = true;
 
@@ -55,7 +58,6 @@ uint16_t getBufferData(const uint8_t rowNum) {
         return 0;
     }
     return charBuffer[idx];
-
 }
 
 /**
@@ -102,9 +104,6 @@ void setup() {
     //prepare controller pin
     pinMode(CLOCK_CONTROLLER_PIN, OUTPUT);
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
-
-    //TODO: experimental
-    draw("1");
 }
 
 void update() {
@@ -116,7 +115,7 @@ void update() {
     }
 
     if (time - lastBufferUpdate > UPDATE_BUFFER_TIME) {
-        if (bufferIdx == bufferSize + ROWS - 1) {
+        if (bufferIdx == bufferSize + min(bufferSize, ROWS) - 1) {
             bufferIdx = -ROWS;
         }
         else {
@@ -151,18 +150,22 @@ void setScreenPower(const bool on) {
 
 }
 
-void draw(const char* str) {
-    bufferIdx = -ROWS;
-    //TODO
-        //TODO: string must be < MAXBUFFERSIZE
-    charBuffer[0] = arrayChar::ONE[0];
-    charBuffer[1] = arrayChar::ONE[1];
-    charBuffer[2] = arrayChar::ONE[2];
-    charBuffer[3] = arrayChar::SPACE;
-    charBuffer[4] = arrayChar::TWO[0];
-    charBuffer[5] = arrayChar::TWO[1];
-    charBuffer[6] = arrayChar::TWO[2];
-    bufferSize = 7;
+void draw(const char* str) {    //draw being called constantly is bad
+    //TODO: use double buffer, one to write another to read AND QUEUEING
+    uint8_t idx = 0;
+    for (int i = 0; i < strlen(str); i++) {
+        arrayChar::CharArr val = arrayChar::toLEDChar(str[i]);
+
+        if (idx + val.size > BUFFER_MAX_CHARACTERS) {
+            break;
+        }
+        for (int j = 0; j < val.size; j++) {
+            charBuffer[idx + j] = val.vals[j];
+        }
+        idx += val.size;
+        charBuffer[idx++] = arrayChar::SPACE_BETWEEN_CHARS; //add space betwenn chars
+    }
+    bufferSize = idx;
 
 }
 }; //namespace ledArr

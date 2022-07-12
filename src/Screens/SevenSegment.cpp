@@ -202,5 +202,6 @@ void toggleClockDivider() {
 
 void setEditableField(const uint8_t field) {
     editableDigits = field;
+    blinkVal = false;
 }
 };  // namespace svnSeg

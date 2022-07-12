@@ -5,23 +5,19 @@
  * @date 2022-07-11
  *
  */
+#include <stdint.h>
+
 namespace arrayChar {
 
-const uint8_t SIZE_OF_CHARS = 3; //size of the character array
-const uint16_t SPACE = 0;
+const uint8_t SIZE_OF_CHARS = 3; //size of the character in the display
+const uint16_t SPACE_BETWEEN_CHARS = 0; //byteCode to replicate a line between characters in the display
 
-const uint16_t ZERO[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0100010000000000, 0b0111110000000000 };
-const uint16_t ONE[SIZE_OF_CHARS] = { 0, 0, 0b0111110000000000 };
-const uint16_t TWO[SIZE_OF_CHARS] = { 0b0111010000000000, 0b0101010000000000, 0b0101110000000000 };
-const uint16_t THREE[SIZE_OF_CHARS] = { 0b0101010000000000, 0b0101010000000000, 0b0111110000000000 };
-const uint16_t FOUR[SIZE_OF_CHARS] = { 0b011100000000000, 0b000100000000000, 0b0111110000000000 };
-const uint16_t FIVE[SIZE_OF_CHARS] = { 0b0101110000000000, 0b0101010000000000, 0b0111010000000000 };
-const uint16_t SIX[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0101010000000000, 0b0101110000000000 };
-const uint16_t SEVEN[SIZE_OF_CHARS] = { 0b0100000000000000, 0b0100000000000000, 0b0101110000000000 };
-const uint16_t EIGHT[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0101010000000000, 0b0111110000000000 };
-const uint16_t NINE[SIZE_OF_CHARS] = { 0b011100000000000, 0b0101000000000000, 0b0111110000000000 };
+struct CharArr {
+    uint8_t size;
+    const int* vals;
+};
 
-
+CharArr toLEDChar(const char c);
 } // namespace arrayChar
 
 
