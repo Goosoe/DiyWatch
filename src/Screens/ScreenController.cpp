@@ -40,13 +40,13 @@ uint8_t incrementEditField() {
     return setEditableField((editableField + 1) % MAX_EDITABLE_FIELDS);
 }
 
-void drawSS(const uint8_t* timeArr) {
+void SSDraw(const uint8_t* timeArr) {
     svnSeg::drawNumbers(timeArr);
 }
 
 
-void drawLA(const char* str) {
-    ledArr::draw(str);
+void LASendToBuffer(const char* str) {
+    ledArr::sendToBuffer(str);
 }
 
 void setBlink(const bool on) {

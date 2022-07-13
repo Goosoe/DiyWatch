@@ -32,10 +32,10 @@ const uint16_t C_THREE = 0b0001000000000000;
 const uint16_t C_FOUR = 0b0000100000000000;
 const uint16_t C_FIVE = 0b0000010000000000;
 
-const uint8_t STRING_MAX_SIZE = 15; //counting with
+const uint8_t STRING_MAX_SIZE = 15;
+const uint8_t BUFFER_MAX_CHARACTERS = STRING_MAX_SIZE * arrayChar::SIZE_OF_CHARS + STRING_MAX_SIZE; //counting with spaces
 
-const uint8_t BUFFER_MAX_CHARACTERS = STRING_MAX_SIZE * arrayChar::SIZE_OF_CHARS + STRING_MAX_SIZE; //counting with
-
+const uint8_t NUM_OF_DISPLAY_BUFFERS = 2;
 
 bool screenOn = true;
 
@@ -43,21 +43,31 @@ uint32_t lastUpdate = 0;  // time in ms
 uint32_t lastBlink = 0;   // time in ms
 uint32_t lastBufferUpdate = 0;   // time in ms
 
-
 uint8_t row = 0;  // current row to draw
 uint8_t previousRow = 0;
 
-uint16_t charBuffer[BUFFER_MAX_CHARACTERS] = { 0 };
-int8_t bufferIdx = -ROWS;
-uint8_t bufferSize = 0;
-char* previousStr;
+
+struct Buffer {
+    int displayBuffer[NUM_OF_DISPLAY_BUFFERS][BUFFER_MAX_CHARACTERS] = { {0}, {0} }; //double buffer display
+    uint8_t currentBuffer = 0;
+    String nextText = String();
+
+    int8_t bufferIdx = -ROWS;
+    uint8_t bufferSize[NUM_OF_DISPLAY_BUFFERS] = { 0 };
+
+} Buffer;
+
+
+int nextBuffer() {
+    return (Buffer.currentBuffer + 1) % NUM_OF_DISPLAY_BUFFERS;
+}
 
 uint16_t getBufferData(const uint8_t rowNum) {
-    int8_t idx = bufferIdx + rowNum;
-    if (idx < 0 || idx > bufferSize) {
+    int8_t idx = Buffer.bufferIdx + rowNum;
+    if (idx < 0 || idx > Buffer.bufferSize[Buffer.currentBuffer]) {
         return 0;
     }
-    return charBuffer[idx];
+    return Buffer.displayBuffer[Buffer.currentBuffer][idx];
 }
 
 /**
@@ -96,6 +106,19 @@ uint16_t getRow(const uint8_t rowNum) {
     }
 }
 
+void switchBuffer() {
+    Buffer.bufferIdx = -ROWS;
+    Buffer.bufferSize[Buffer.currentBuffer] = 0;
+    Buffer.nextText = "";
+    // Buffer.nextText = "";
+    Buffer.currentBuffer = (Buffer.currentBuffer + 1) % NUM_OF_DISPLAY_BUFFERS;
+
+}
+
+void initBuffer() {
+    sendToBuffer(" ", true);
+}
+
 void setup() {
     // prepare Shift Registers
     pinMode(DS, OUTPUT);
@@ -104,27 +127,33 @@ void setup() {
     //prepare controller pin
     pinMode(CLOCK_CONTROLLER_PIN, OUTPUT);
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
+    initBuffer();
 }
 
 void update() {
     const uint32_t time = millis();
-    if (time < lastUpdate || time < lastBufferUpdate || time < lastBlink) {  // Saves from the time eventual overflow
+    if (time < lastUpdate) {  // Saves from the time eventual overflow
         lastUpdate = time;
+
+    }
+    if (time < lastBufferUpdate) {  // Saves from the time eventual overflow
+
         lastBufferUpdate = time;
+
+    }
+    if (time < lastBlink) {  // Saves from the time eventual overflow
+
         lastBlink < time;
     }
 
     if (time - lastBufferUpdate > UPDATE_BUFFER_TIME) {
-        if (bufferIdx == bufferSize + min(bufferSize, ROWS) - 1) {
-            bufferIdx = -ROWS;
-        }
-        else {
-            bufferIdx = (bufferIdx + 1) % (bufferSize + min(bufferSize, ROWS));
+        if (Buffer.bufferIdx++ == Buffer.bufferSize[Buffer.currentBuffer] + min(Buffer.bufferSize[Buffer.currentBuffer], ROWS)) { // current display ended 
+            switchBuffer();
         }
         lastBufferUpdate = time;
     }
 
-    if (time - lastUpdate < UPDATE_TIME) {
+    if (time - lastUpdate < UPDATE_TIME || Buffer.bufferSize == 0) {
         return;
     }
 
@@ -150,22 +179,28 @@ void setScreenPower(const bool on) {
 
 }
 
-void draw(const char* str) {    //draw being called constantly is bad
-    //TODO: use double buffer, one to write another to read AND QUEUEING
-    uint8_t idx = 0;
-    for (int i = 0; i < strlen(str); i++) {
-        arrayChar::CharArr val = arrayChar::toLEDChar(str[i]);
+void sendToBuffer(const char* text, bool reset) {
 
+    String str = String(text);
+    if (str == Buffer.nextText || Buffer.bufferSize[nextBuffer()] != 0) {
+        return;
+    }
+    Buffer.nextText = str;
+    uint8_t idx = 0;
+    for (int i = 0; i < str.length(); i++) {
+        arrayChar::CharArr val = arrayChar::toLEDChar(str[i]);
         if (idx + val.size > BUFFER_MAX_CHARACTERS) {
             break;
         }
         for (int j = 0; j < val.size; j++) {
-            charBuffer[idx + j] = val.vals[j];
+            Buffer.displayBuffer[nextBuffer()][idx + j] = val.vals[j];
         }
         idx += val.size;
-        charBuffer[idx++] = arrayChar::SPACE_BETWEEN_CHARS; //add space betwenn chars
+        Buffer.displayBuffer[nextBuffer()][idx++] = arrayChar::SPACE_BETWEEN_CHARS; //add space betwenn chars
     }
-    bufferSize = idx;
-
+    Buffer.bufferSize[nextBuffer()] = idx + 1;  //index starts at 0, the size is +1
+    if (reset) {
+        switchBuffer();
+    }
 }
 }; //namespace ledArr

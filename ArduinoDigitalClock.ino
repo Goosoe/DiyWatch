@@ -122,9 +122,10 @@ void loop() {
     updateComponents();
     //TODO: add in the state machine? or make these functions be called over time
     mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
-    screenController::drawSS(timeArr);
-    screenController::drawLA(String(sensors::getTemp()).c_str());
-    // screenController::drawLA("456789");
+    screenController::SSDraw(timeArr);
+
+    // screenController::LASendToBuffer("123456789");
+    screenController::LASendToBuffer(String(sensors::getTemp()).c_str());
 
     // screenController::drawLA("123");
     // sensors::getTemp(); //TODO: should be called every minute

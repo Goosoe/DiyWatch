@@ -43,14 +43,14 @@ uint8_t incrementEditField();  //TODO:docs
  *
  * @param arr
  */
-void drawSS(const uint8_t* arr);
+void SSDraw(const uint8_t* arr);
 
 /**
  * @brief Sends a string (max size 30) to the LED Array screen to be drawn
  *
  * @param str
  */
-void drawLA(const char* str);
+void LASendToBuffer(const char* str);
 /**
  * @brief Stops the blink
  *
