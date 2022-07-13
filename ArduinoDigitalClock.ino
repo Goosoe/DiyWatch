@@ -11,6 +11,8 @@ uint8_t timeArr[SIZE] = { 0 };
 namespace stateController {
 
 uint8_t state, mode, currentEditField = 0;
+
+bool switchState = false;
 // uint8_t currentEditField = 0;
 
 /**
@@ -28,16 +30,12 @@ void resetEditData() {
 void evalCommand(controls::COMMAND comm) {
     switch (comm) {
     case controls::COMMAND::B1_PRESS:
-        if (stateUtil::STATE::TIME == state) {
-            if (stateUtil::MODE::READ == mode) {
-                resetEditData();
-                // TODO: uncomment when we want to switch between modes
-                //     state += 1 % (STATE::ALARM + 1); //USE LAST STATE OF THE ENUM
-                //     Serial.print("===\nNew State:");
-                //     Serial.println(state);
-                //     Serial.println("===");
-            }
-            else if (stateUtil::MODE::EDIT == mode) {
+        if (stateUtil::MODE::READ == mode) {
+            state = (state + 1) % (stateUtil::STATE::ALARM + 1);
+            switchState = true;
+        }
+        else if (stateUtil::MODE::EDIT == mode) {
+            if (stateUtil::STATE::TIME == state) {
                 currentEditField = screenController::incrementEditField();
                 screenController::setBlink(true);
             }
@@ -55,6 +53,7 @@ void evalCommand(controls::COMMAND comm) {
         }
         else if (stateUtil::MODE::EDIT == mode) {
             mode = stateUtil::MODE::READ;
+            resetEditData();
             screenController::setBlink(false);
         }
         break;
@@ -123,10 +122,31 @@ void loop() {
     //TODO: add in the state machine? or make these functions be called over time
     mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
     screenController::SSDraw(timeArr);
-
     // screenController::LASendToBuffer("123456789");
-    screenController::LASendToBuffer(String(sensors::getTemp()).c_str());
 
+    //TODO: put in a function
+    switch (stateController::state) {
+    case stateUtil::STATE::TIME:
+        screenController::LASendToBuffer("1", stateController::switchState);
+        break;
+    case stateUtil::STATE::SENSORS:
+        screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::switchState);
+        break;
+
+    case stateUtil::STATE::CHRONOMETER:
+        screenController::LASendToBuffer("345", stateController::switchState);
+        break;
+
+    case stateUtil::STATE::ALARM:
+        screenController::LASendToBuffer("6789", stateController::switchState);
+        break;
+
+    default:
+        break;
+    }
+    if (stateController::switchState) {
+        stateController::switchState = false;
+    }
     // screenController::drawLA("123");
     // sensors::getTemp(); //TODO: should be called every minute
 

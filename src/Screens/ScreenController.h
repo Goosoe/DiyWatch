@@ -50,7 +50,7 @@ void SSDraw(const uint8_t* arr);
  *
  * @param str
  */
-void LASendToBuffer(const char* str);
+void LASendToBuffer(const char* str, const bool reset = false);
 /**
  * @brief Stops the blink
  *

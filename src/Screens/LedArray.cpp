@@ -57,9 +57,28 @@ struct Buffer {
 
 } Buffer;
 
+void initBuffer() {
+    sendToBuffer(" ", true);
+}
+//cleans everything that has in buffer
+void resetBuffer(uint8_t bufferId) {
+    for (int i = 0; i < Buffer.bufferSize[bufferId]; i++) {
+        Buffer.displayBuffer[bufferId][i] = 0;
+    }
+    Buffer.bufferIdx = -ROWS;
+    Buffer.bufferSize[bufferId] = 0;
 
+
+}
 int nextBuffer() {
     return (Buffer.currentBuffer + 1) % NUM_OF_DISPLAY_BUFFERS;
+}
+
+void switchBuffer() {
+    resetBuffer(Buffer.currentBuffer);
+    Buffer.nextText = "";
+    Buffer.currentBuffer = nextBuffer();
+
 }
 
 uint16_t getBufferData(const uint8_t rowNum) {
@@ -106,19 +125,6 @@ uint16_t getRow(const uint8_t rowNum) {
     }
 }
 
-void switchBuffer() {
-    Buffer.bufferIdx = -ROWS;
-    Buffer.bufferSize[Buffer.currentBuffer] = 0;
-    Buffer.nextText = "";
-    // Buffer.nextText = "";
-    Buffer.currentBuffer = (Buffer.currentBuffer + 1) % NUM_OF_DISPLAY_BUFFERS;
-
-}
-
-void initBuffer() {
-    sendToBuffer(" ", true);
-}
-
 void setup() {
     // prepare Shift Registers
     pinMode(DS, OUTPUT);
@@ -152,7 +158,6 @@ void update() {
         }
         lastBufferUpdate = time;
     }
-
     if (time - lastUpdate < UPDATE_TIME || Buffer.bufferSize == 0) {
         return;
     }
@@ -179,12 +184,14 @@ void setScreenPower(const bool on) {
 
 }
 
-void sendToBuffer(const char* text, bool reset) {
-
+void sendToBuffer(const char* text, const bool reset) {
+    //TODO: review idx
     String str = String(text);
-    if (str == Buffer.nextText || Buffer.bufferSize[nextBuffer()] != 0) {
+    if (str == Buffer.nextText || (!reset && Buffer.bufferSize[nextBuffer()] != 0)) {   //TODO: improve this
         return;
     }
+    uint8_t nextBuffVal = nextBuffer();
+    resetBuffer(nextBuffVal);
     Buffer.nextText = str;
     uint8_t idx = 0;
     for (int i = 0; i < str.length(); i++) {
@@ -193,12 +200,17 @@ void sendToBuffer(const char* text, bool reset) {
             break;
         }
         for (int j = 0; j < val.size; j++) {
-            Buffer.displayBuffer[nextBuffer()][idx + j] = val.vals[j];
+            Buffer.displayBuffer[nextBuffVal][idx + j] = val.vals[j];
         }
         idx += val.size;
-        Buffer.displayBuffer[nextBuffer()][idx++] = arrayChar::SPACE_BETWEEN_CHARS; //add space betwenn chars
+        if (i + 1 < str.length()) { // if not last char
+            Buffer.displayBuffer[nextBuffVal][idx++] = 0; //add space betwenn chars
+        }
     }
-    Buffer.bufferSize[nextBuffer()] = idx + 1;  //index starts at 0, the size is +1
+    Buffer.bufferSize[nextBuffVal] = idx + 1;  //index starts at 0, the size is +1
+
+    // Serial.println("Buffered " + str);
+    // Serial.println(idx);
     if (reset) {
         switchBuffer();
     }

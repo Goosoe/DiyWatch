@@ -38,6 +38,6 @@ void setScreenPower(const bool on);
  *
  * @param str - to write in the buffer/LED Array
  */
-void sendToBuffer(const char* str, bool reset = false);
+void sendToBuffer(const char* str, const bool reset = false);
 
 } // namespace ledArr

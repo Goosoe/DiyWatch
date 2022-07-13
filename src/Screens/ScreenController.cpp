@@ -45,8 +45,8 @@ void SSDraw(const uint8_t* timeArr) {
 }
 
 
-void LASendToBuffer(const char* str) {
-    ledArr::sendToBuffer(str);
+void LASendToBuffer(const char* str, const bool reset) {
+    ledArr::sendToBuffer(str, reset);
 }
 
 void setBlink(const bool on) {
