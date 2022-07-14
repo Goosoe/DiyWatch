@@ -205,8 +205,6 @@ void sendToBuffer(const char* text, const bool reset) {
         || (!reset && Buffer.bufferSize[nextBuffer()] != 0)) {   //TODO: improve this
         return;
     }
-
-    resetBuffer(nextBuffVal);
     Buffer.bufferText[nextBuffVal] = str;
     int idx = 0;
     for (int i = 0; i < str.length(); i++) {
