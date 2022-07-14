@@ -28,16 +28,14 @@ void setup();
 void update();
 
 /**
- * @brief Set the Editable Field in the selected screen
+ * @brief Resets the editField in the selected screen
  */
-uint8_t setEditableField(const uint8_t field); //TODO: MAKE ENUM
+void resetEditField(); //TODO: MAKE ENUM
 
 /**
  * @brief updates the EditField so it can alert the necessary displays about editing
- *
- * @return uint8_t the new editfield value
  */
-uint8_t incrementEditField();
+void incrementEditField();
 
 /**
  * @brief Sends an array (of size 4) to the seven-segment screen to be drawn

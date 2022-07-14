@@ -22,7 +22,7 @@ void update() { //TODO: state mode must be specific to different modules
  * @brief Set the Editable Field value
  * @param field
  */
-uint8_t setEditableField(const uint8_t field) {
+void setEditableField(const uint8_t field) {
     editableField = field;
     if (editableField < 2) {   //0 = hours, 1 = minutes //TODO: magic numbers
         svnSeg::setEditableField(min(editableField, MAX_EDITABLE_FIELDS));
@@ -35,11 +35,13 @@ uint8_t setEditableField(const uint8_t field) {
         //ledArr::setBlink(true);
 
     }
-    return field;
 }
 
-uint8_t incrementEditField() {
-    return setEditableField((editableField + 1) % MAX_EDITABLE_FIELDS);
+void resetEditField() {
+    setEditableField(0);
+}
+void incrementEditField() {
+    setEditableField((editableField + 1) % MAX_EDITABLE_FIELDS);
 }
 
 void SSDraw(const uint8_t* timeArr) {

@@ -10,17 +10,9 @@ uint8_t timeArr[SIZE] = { 0 };
 
 namespace stateController {
 
-uint8_t state, mode, currentEditField = 0;
+uint8_t state, mode = 0;
 
 bool switchState = false;
-// uint8_t currentEditField = 0;
-
-/**
- * @brief resets all the variables used in the edit mode so it can start properly next time edit mode is entered in
- */
-void resetEditData() {
-    currentEditField = screenController::setEditableField(0);
-}
 
 /**
  * @brief Called from the responsible Controller function.
@@ -36,7 +28,7 @@ void evalCommand(controls::COMMAND comm) {
         }
         else if (stateUtil::MODE::EDIT == mode) {
             if (stateUtil::STATE::TIME == state) {
-                currentEditField = screenController::incrementEditField();
+                screenController::incrementEditField();
                 screenController::setBlink(true);
             }
         }
@@ -44,16 +36,16 @@ void evalCommand(controls::COMMAND comm) {
 
     case controls::COMMAND::B1_HOLD:
         if (stateUtil::MODE::READ == mode) {
-            mode = stateUtil::MODE::EDIT;
-            if (stateUtil::STATE::TIME == state) {
-                resetEditData();
+            if (stateUtil::STATE::TIME == state || stateUtil::STATE::ALARM == state) {
+                mode = stateUtil::MODE::EDIT;
+                screenController::resetEditField();
                 screenController::setBlink(true);
                 //TODO: set mode
             }
         }
         else if (stateUtil::MODE::EDIT == mode) {
             mode = stateUtil::MODE::READ;
-            resetEditData();
+            screenController::resetEditField();
             screenController::setBlink(false);
         }
         break;
@@ -64,7 +56,7 @@ void evalCommand(controls::COMMAND comm) {
                 //TODO:
             }
             else if (stateUtil::MODE::EDIT == mode) {
-                switch (currentEditField) {
+                switch (screenController::getEditField()) {
                 case 0:
                     mcpRtc::addHour();
                     screenController::setBlink(true);   //to update blink timer
@@ -85,7 +77,7 @@ void evalCommand(controls::COMMAND comm) {
                 //TODO:
             }
             else if (stateUtil::MODE::EDIT == mode) {   //TODO: thread addhour & addminute?
-                switch (currentEditField) {     //TODO: Hold button is the same as press right nonw
+                switch (screenController::getEditField()) {     //TODO: Hold button is the same as press right nonw
                 case 0: // edit hour field
                     mcpRtc::addHour();
                     break;
@@ -134,11 +126,12 @@ void loop() {
         break;
 
     case stateUtil::STATE::CHRONOMETER:
-        screenController::LASendToBuffer("345", stateController::switchState);
+        screenController::LASendToBuffer("3", stateController::switchState);
+        screenController::LASendToBuffer("4");
         break;
 
     case stateUtil::STATE::ALARM:
-        screenController::LASendToBuffer("6789", stateController::switchState);
+        screenController::LASendToBuffer("mn", stateController::switchState);
         break;
 
     default:
@@ -147,9 +140,6 @@ void loop() {
     if (stateController::switchState) {
         stateController::switchState = false;
     }
-    // screenController::drawLA("123");
-    // sensors::getTemp(); //TODO: should be called every minute
-
 }
 
 /**
