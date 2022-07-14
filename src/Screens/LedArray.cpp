@@ -2,7 +2,7 @@
 #include "LedArray.h"
 #include "ArrayCharacters.h"
 #include "ScreenController.h"
-// #include "math.h"
+
 namespace ledArr {
 
 const uint8_t DS = 7;
@@ -44,9 +44,10 @@ uint32_t lastBlink = 0;   // time in ms
 uint32_t lastBufferUpdate = 0;   // time in ms
 
 uint8_t row = 0;  // current row to draw
-uint8_t previousRow = 0;
 
-
+/**
+ * @brief structure with info for the double buffer
+ */
 struct Buffer {
     int displayBuffer[NUM_OF_DISPLAY_BUFFERS][BUFFER_MAX_CHARACTERS] = { {0}, {0} }; //double buffer display
     uint8_t currentBuffer = 0;
@@ -57,14 +58,25 @@ struct Buffer {
 
 } Buffer;
 
+/**
+ * @brief initializes the buffer. Should be called during setup
+ */
 void initBuffer() {
     sendToBuffer(" ", true);
 }
+
+/**
+ * @brief - resets the bufferIdx
+ */
 void resetIdx() {
     Buffer.bufferIdx = -ROWS;
 }
 
-//cleans everything that has in buffer
+/**
+ * @brief - resets the specified buffer and any other necessary parameter in Buffer
+ *
+ * @param bufferId - which of the buffers to reset
+ */
 void resetBuffer(uint8_t bufferId) {
     if (Buffer.bufferSize[bufferId] == 0) {
         return;
@@ -76,6 +88,11 @@ void resetBuffer(uint8_t bufferId) {
     Buffer.bufferSize[bufferId] = 0;
     Buffer.bufferText[Buffer.currentBuffer] = "";
 }
+
+/**
+ * @brief gets the index of the buffer that is not currently in use
+ * @return index
+ */
 int nextBuffer() {
     return (Buffer.currentBuffer + 1) % NUM_OF_DISPLAY_BUFFERS;
 }
@@ -92,6 +109,12 @@ void updateBuffer() {
     Buffer.currentBuffer = nextBuffer();
 }
 
+/**
+ * @brief Get the Buffer display data of a specific row
+ *
+ * @param rowNum - current row to show
+ * @return uint16_t - data to show in specific  rowNum
+ */
 uint16_t getBufferData(const uint8_t rowNum) {
     int8_t idx = Buffer.bufferIdx + rowNum;
     if (idx < 0 || idx > Buffer.bufferSize[Buffer.currentBuffer]) {
@@ -185,7 +208,6 @@ void update() {
     digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
 
-    previousRow = row;
     row = (row + 1) % ROWS;
     lastUpdate = time;
 }
@@ -193,7 +215,6 @@ void update() {
 
 void setScreenPower(const bool on) {
     screenOn = on;
-
 }
 
 void sendToBuffer(const char* text, const bool reset) {

@@ -190,8 +190,8 @@ void setScreenPower(const bool on) {
     screenOn = on;
 }
 
-void setBlink(const bool on) {
-    blink = on;
+void setBlink(const bool val) {
+    blink = val;
     blinkVal = true;
     lastBlink = millis();
 }

@@ -1,11 +1,8 @@
 /**
- * @file MCP7940.ino
+ * @file RTC.h
  * @author Goosoe
  * @brief
- * MCP7940 I2C comm library
- * This library is not complete and was created so I could have a better understanding
- * of I2C and RTC IC's.
- * @copyright Copyright (c) 2022
+ * RTC library for the MCP7940M
  */
 #pragma once
 #include <stdint.h>

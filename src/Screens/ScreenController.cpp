@@ -32,6 +32,8 @@ uint8_t setEditableField(const uint8_t field) {
             svnSeg::setBlink(false);
             // ledArr::setEditableField(min(editableField, MAX_EDITABLE_FIELDS));
         }
+        //ledArr::setBlink(true);
+
     }
     return field;
 }
@@ -49,13 +51,18 @@ void LASendToBuffer(const char* str, const bool reset) {
     ledArr::sendToBuffer(str, reset);
 }
 
-void setBlink(const bool on) {
-    blink = on;
+void setBlink(const bool val) {
+    blink = val;
     if (editableField < 2) {   //0 = hours, 1 = minutes //TODO: magic numbers
-        svnSeg::setBlink(on);
+        svnSeg::setBlink(blink);
     }
     else {
         // ledArr::setBlink(on);
     }
 }
+
+uint8_t getEditField() {
+    return editableField;
+}
+
 }; // namespace screenController

@@ -1,9 +1,7 @@
 /**
 * @file ScreenController.h
 * @author Goosoe
-* @brief This library has the API to control all the displays for the clock
-* @copyright Copyright (c) 2022
-*
+* @brief API to control all the displays for the clock
 */
 
 #pragma once
@@ -30,13 +28,16 @@ void setup();
 void update();
 
 /**
- * @brief Set the Editable Field in the correct screen
- *
- * @param field
+ * @brief Set the Editable Field in the selected screen
  */
 uint8_t setEditableField(const uint8_t field); //TODO: MAKE ENUM
 
-uint8_t incrementEditField();  //TODO:docs
+/**
+ * @brief updates the EditField so it can alert the necessary displays about editing
+ *
+ * @return uint8_t the new editfield value
+ */
+uint8_t incrementEditField();
 
 /**
  * @brief Sends an array (of size 4) to the seven-segment screen to be drawn
@@ -51,9 +52,18 @@ void SSDraw(const uint8_t* arr);
  * @param str
  */
 void LASendToBuffer(const char* str, const bool reset = false);
+
 /**
- * @brief Stops the blink
+ * @brief Sets the blink variable
  *
+ * @param val - value
  */
-void setBlink(const bool on);
+void setBlink(const bool val);
+
+/**
+ * @brief Get the Current EditField value
+ *
+ * @return uint8_t
+ */
+uint8_t getEditField();
 };  // namespace screenController

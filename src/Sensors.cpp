@@ -6,7 +6,7 @@ namespace sensors {
 const uint8_t TEMP_CALIBRATION_OFFSET = 10;
 const uint8_t TEMP_ARR_SIZE = 5;
 const uint8_t TEMP_SENSOR = 17; //port A3
-const uint16_t UPDATE_TIME = 60000; // seconds TODO: change to a reasonable value
+const uint16_t UPDATE_TIME = 60000; // ms TODO: change to a reasonable value
 
 /*Struct and function declarations*/
 struct {
@@ -15,17 +15,13 @@ struct {
 } tempData;
 
 uint8_t readTempSensor();
-/**/
 
 int8_t currentTemp = 0;
 uint32_t lastUpdate = 0;  // time in ms
 
-
-
 void setup() {
-    int8_t temp = readTempSensor();
     for (uint8_t i = 0; i < TEMP_ARR_SIZE; i++) {
-        tempData.avgTemp[i] = temp;
+        tempData.avgTemp[i] = readTempSensor();
     }
 }
 

@@ -1,5 +1,5 @@
 /**
- * @file TimeDisplay.h
+ * @file SevenSegment.h
  * @author Goosoe
  * @brief This file has all the functions required to properly write in the 4x7-segment display being used (LTC-2623G)
  * The digits and segments are being controlled by two daisy chained shift registers
@@ -65,16 +65,16 @@ void update();
 /**
  * @brief Set the Screen Power
  *
- * @param on
+ * @param val
  */
-void setScreenPower(const bool on);
+void setScreenPower(const bool val);
 
 /**
  * @brief Set the Blink variable
  *
- * @param on
+ * @param val
  */
-void setBlink(const bool on);
+void setBlink(const bool val);
 
 /**
  * @brief Sets the Editable Field. This value is used to know which of the digits are supposed to be edited

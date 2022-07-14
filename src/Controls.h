@@ -1,4 +1,9 @@
-
+/**
+ * @file Controls.h
+ * @author Goosoe
+ * @brief
+ * API for the button/switches components
+ */
 #pragma once
 #include <stdint.h>
 

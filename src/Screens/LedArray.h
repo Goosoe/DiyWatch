@@ -2,8 +2,7 @@
 /**
 * @file ScreenController.h
 * @author Goosoe
-* @brief This library has the API to control all the displays for the clock
-* @copyright Copyright (c) 2022
+* @brief API to control the LED Array
 *
 */
 
@@ -19,7 +18,7 @@ namespace ledArr {
 void setup();
 
 /**
- * @brief Updates the Timedisplay
+ * @brief Updates the display
  *
  * @param time current time
  * @param mode current mode
@@ -29,13 +28,13 @@ void update();
 /**
  * @brief Set the Screen Power
  *
- * @param on
+ * @param val
  */
-void setScreenPower(const bool on);
+void setScreenPower(const bool val);
 
 /**
- * @brief Wipes the buffer and adds the string
- *
+ * @brief Adds str as the next text to show
+ * @param reset - Forces the array to show the text imediately, halting the current display
  * @param str - to write in the buffer/LED Array
  */
 void sendToBuffer(const char* str, const bool reset = false);
