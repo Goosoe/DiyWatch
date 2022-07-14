@@ -127,7 +127,7 @@ void loop() {
     //TODO: put in a function
     switch (stateController::state) {
     case stateUtil::STATE::TIME:
-        screenController::LASendToBuffer("1", stateController::switchState);
+        screenController::LASendToBuffer("mon 21 22", stateController::switchState);
         break;
     case stateUtil::STATE::SENSORS:
         screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::switchState);

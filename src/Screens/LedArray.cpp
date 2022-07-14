@@ -13,7 +13,7 @@ const uint8_t CLOCK_CONTROLLER_PIN = 6;
 
 const uint16_t REFRESH = 500;  // nr of updates per sec
 const float UPDATE_TIME = 1000 / REFRESH;
-const float UPDATE_BUFFER_TIME = 250; //ms
+const float UPDATE_BUFFER_TIME = 125; //ms
 
 // const uint16_t BLINK_TIME = 600;
 const uint8_t ROWS = 7;
@@ -50,7 +50,7 @@ uint8_t previousRow = 0;
 struct Buffer {
     int displayBuffer[NUM_OF_DISPLAY_BUFFERS][BUFFER_MAX_CHARACTERS] = { {0}, {0} }; //double buffer display
     uint8_t currentBuffer = 0;
-    String nextText = String();
+    String bufferText[NUM_OF_DISPLAY_BUFFERS] = { String() };
 
     int8_t bufferIdx = -ROWS;
     uint8_t bufferSize[NUM_OF_DISPLAY_BUFFERS] = { 0 };
@@ -60,25 +60,36 @@ struct Buffer {
 void initBuffer() {
     sendToBuffer(" ", true);
 }
+void resetIdx() {
+    Buffer.bufferIdx = -ROWS;
+}
+
 //cleans everything that has in buffer
 void resetBuffer(uint8_t bufferId) {
+    if (Buffer.bufferSize[bufferId] == 0) {
+        return;
+    }
     for (int i = 0; i < Buffer.bufferSize[bufferId]; i++) {
         Buffer.displayBuffer[bufferId][i] = 0;
     }
-    Buffer.bufferIdx = -ROWS;
+    resetIdx();
     Buffer.bufferSize[bufferId] = 0;
-
-
+    Buffer.bufferText[Buffer.currentBuffer] = "";
 }
 int nextBuffer() {
     return (Buffer.currentBuffer + 1) % NUM_OF_DISPLAY_BUFFERS;
 }
 
-void switchBuffer() {
+/**
+ * @brief updates the buffer if has next value or resets the idx
+ */
+void updateBuffer() {
+    if (Buffer.bufferSize[nextBuffer()] == 0) {
+        resetIdx();
+        return;
+    }
     resetBuffer(Buffer.currentBuffer);
-    Buffer.nextText = "";
     Buffer.currentBuffer = nextBuffer();
-
 }
 
 uint16_t getBufferData(const uint8_t rowNum) {
@@ -153,8 +164,9 @@ void update() {
     }
 
     if (time - lastBufferUpdate > UPDATE_BUFFER_TIME) {
-        if (Buffer.bufferIdx++ == Buffer.bufferSize[Buffer.currentBuffer] + min(Buffer.bufferSize[Buffer.currentBuffer], ROWS)) { // current display ended 
-            switchBuffer();
+        uint8_t currBuffSize = Buffer.bufferSize[Buffer.currentBuffer];
+        if (currBuffSize > 0 && Buffer.bufferIdx++ == currBuffSize + min(currBuffSize, ROWS)) { // current display ended 
+            updateBuffer();
         }
         lastBufferUpdate = time;
     }
@@ -185,15 +197,18 @@ void setScreenPower(const bool on) {
 }
 
 void sendToBuffer(const char* text, const bool reset) {
-    //TODO: review idx
     String str = String(text);
-    if (str == Buffer.nextText || (!reset && Buffer.bufferSize[nextBuffer()] != 0)) {   //TODO: improve this
+    str.toUpperCase();
+    uint8_t nextBuffVal = nextBuffer();
+
+    if (str == Buffer.bufferText[Buffer.currentBuffer] || str == Buffer.bufferText[nextBuffVal]
+        || (!reset && Buffer.bufferSize[nextBuffer()] != 0)) {   //TODO: improve this
         return;
     }
-    uint8_t nextBuffVal = nextBuffer();
+
     resetBuffer(nextBuffVal);
-    Buffer.nextText = str;
-    uint8_t idx = 0;
+    Buffer.bufferText[nextBuffVal] = str;
+    int idx = 0;
     for (int i = 0; i < str.length(); i++) {
         arrayChar::CharArr val = arrayChar::toLEDChar(str[i]);
         if (idx + val.size > BUFFER_MAX_CHARACTERS) {
@@ -207,12 +222,9 @@ void sendToBuffer(const char* text, const bool reset) {
             Buffer.displayBuffer[nextBuffVal][idx++] = 0; //add space betwenn chars
         }
     }
-    Buffer.bufferSize[nextBuffVal] = idx + 1;  //index starts at 0, the size is +1
-
-    // Serial.println("Buffered " + str);
-    // Serial.println(idx);
+    Buffer.bufferSize[nextBuffVal] = idx; // + 1;  //index starts at 0, the size is +1
     if (reset) {
-        switchBuffer();
+        updateBuffer();
     }
 }
 }; //namespace ledArr
