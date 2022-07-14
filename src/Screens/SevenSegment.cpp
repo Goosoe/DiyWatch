@@ -31,23 +31,25 @@ const uint16_t L1 = 0b0000010000000000;
 
 const uint16_t REFRESH = 260;  // nr of refreshes per sec
 const float UPDATE_TIME = 1000 / REFRESH;
-const uint16_t BLINK_TIME = 600;
 const uint8_t DISPLAY_DIGITS = 5;  // The 5th digit is the clock separator
 
 uint32_t lastUpdate = 0;  // time in ms
-uint32_t lastBlink = 0;   // time in ms
-bool blinkVal = false;   // time in ms
+
+
 
 
 uint8_t row = 0;  // current row to draw
 uint8_t previousRow = 0;
-uint16_t previousByteValue = 0;
-
+uint16_t numberToDraw = 0;
 uint8_t editableDigits = 0;  // 0 = hours digits, 1 = minutes digits TODO: Switch this to Screen Controller
+
+uint8_t numsToDraw[DISPLAY_DIGITS - 1] = { 0 };
+
 bool screenOn = true;
 bool clkDiv = true;
 
-bool blink = false;
+bool blink = true;     //true = display on
+// bool blinkVal = false;   // time in ms
 
 void setup() {
     // prepare Shift Registers
@@ -59,26 +61,18 @@ void setup() {
     digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
 }
 
-void drawNumbers(const uint8_t* numberArr) {
-    if (previousRow == row) {
-        return;
-    }
-
-    // TODO: there must be a way to upgrade the if/else
-    if (row != DISPLAY_DIGITS - 1) {
-        drawNumber(numberArr[row], row);
-    }
-    else {  // draw clockDivider
-        drawNumber(10, row);
-    }
-}
-
-void drawNumber(const uint8_t number, const uint8_t digit) {
-    uint16_t byteValue = 0;
+/**
+ * @brief updates the number to draw in the specific digit
+ * @param number
+ * @param digit - position [0,4]
+ */
+void updateNumberToDraw(const uint8_t number, const uint8_t digit) {
+    numberToDraw = 0;
     if (!screenOn) {
         return;
     }
-    if (blink && !blinkVal) {
+
+    if (!blink) {
         switch (editableDigits) {
         case 0:  // hours digits
             if (digit == 0 || digit == 1) {
@@ -94,21 +88,18 @@ void drawNumber(const uint8_t number, const uint8_t digit) {
             break;
         }
     }
-    byteValue = getDigit(number) | getDigitPosition(digit);
 
-    if (previousByteValue == byteValue) {
-        return;
-    }
-    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
-    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
-
-    shiftOut(DS, SHCP, LSBFIRST, byteValue);
-    shiftOut(DS, SHCP, LSBFIRST, byteValue >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
-
-    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
-    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
-    previousByteValue = byteValue;
+    numberToDraw = getDigit(number) | getDigitPosition(digit);
 }
+
+void setNumbers(const uint8_t* numberArr) {
+    for (int i = 0; i < DISPLAY_DIGITS - 1; i++) {
+        if (numberArr[i] != numsToDraw[i]) {
+            numsToDraw[i] = numberArr[i];
+        }
+    }
+}
+
 
 uint16_t getDigit(const uint8_t num) {
     switch (num) {
@@ -165,9 +156,6 @@ void update() {
     if (time < lastUpdate) {  // Saves from the time eventual overflow
         lastUpdate = time;
     }
-    if (time < lastBlink) {  // Saves from the time eventual overflow
-        lastBlink = time;
-    }
 
     uint8_t moduloDiv = DISPLAY_DIGITS;
     if (!clkDiv) {
@@ -176,13 +164,26 @@ void update() {
     if (time - lastUpdate < UPDATE_TIME) {
         return;
     }
-    if (time - lastBlink > BLINK_TIME && blink) {
-        lastBlink = time;
-        blinkVal = !blinkVal;
-    }
-    previousRow = row;
-    row = (row + 1) % moduloDiv;
 
+    // TODO: there must be a way to upgrade the if/else
+    if (row != DISPLAY_DIGITS - 1) {
+        updateNumberToDraw(numsToDraw[row], row);
+    }
+    else {  // draw clockDivider
+        updateNumberToDraw(10, row);
+    }
+
+    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
+    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
+
+    shiftOut(DS, SHCP, LSBFIRST, numberToDraw);
+    shiftOut(DS, SHCP, LSBFIRST, numberToDraw >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
+
+    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
+    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
+
+    row = (row + 1) % moduloDiv;
+    previousRow = row;
     lastUpdate = time;
 }
 
@@ -192,16 +193,12 @@ void setScreenPower(const bool on) {
 
 void setBlink(const bool val) {
     blink = val;
-    blinkVal = true;
-    lastBlink = millis();
 }
-
 void toggleClockDivider() {
     clkDiv = !clkDiv;
 }
 
 void setEditableField(const uint8_t field) {
     editableDigits = field;
-    blinkVal = false;
 }
 };  // namespace svnSeg

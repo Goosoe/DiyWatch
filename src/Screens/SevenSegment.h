@@ -37,22 +37,15 @@ uint16_t getDigitPosition(const uint8_t digit);
 uint16_t getDigit(const uint8_t num);
 
 /**
- * @brief Writes the number array on the display. Left most value goes to the left-most
+ * @brief Sets the relevant number in the array as the number to display. Left most value goes to the left-most
  * position of the display. If size > 4, it draws the first 4 values
  *
  * @param numberArr - array
  * @param size - [1,n] - size of the given array
  * @param clkDiv - Enables the clock divider in the display
  */
-void drawNumbers(const uint8_t* numberArr);
+void setNumbers(const uint8_t* numberArr);
 
-/**
- * @brief Draws a number into the specified digit position
- *
- * @param number
- * @param digit - position [0,4]
- */
-void drawNumber(const uint8_t number, const uint8_t digit);  // TODO: Is this useful at all?
 
 /**
  * @brief Updates the seven segment display

@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "LedArray.h"
 #include "ArrayCharacters.h"
-#include "ScreenController.h"
+#include "../Util.h"
 
 namespace ledArr {
 
@@ -37,13 +37,13 @@ const uint8_t BUFFER_MAX_CHARACTERS = STRING_MAX_SIZE * arrayChar::SIZE_OF_CHARS
 
 const uint8_t NUM_OF_DISPLAY_BUFFERS = 2;
 
-bool screenOn = true;
 
 uint32_t lastUpdate = 0;  // time in ms
-uint32_t lastBlink = 0;   // time in ms
 uint32_t lastBufferUpdate = 0;   // time in ms
 
 uint8_t row = 0;  // current row to draw
+bool screenOn = true;
+bool blink = false;
 
 /**
  * @brief structure with info for the double buffer
@@ -181,10 +181,6 @@ void update() {
         lastBufferUpdate = time;
 
     }
-    if (time < lastBlink) {  // Saves from the time eventual overflow
-
-        lastBlink < time;
-    }
 
     if (time - lastBufferUpdate > UPDATE_BUFFER_TIME) {
         uint8_t currBuffSize = Buffer.bufferSize[Buffer.currentBuffer];
@@ -193,6 +189,7 @@ void update() {
         }
         lastBufferUpdate = time;
     }
+
     if (time - lastUpdate < UPDATE_TIME || Buffer.bufferSize == 0) {
         return;
     }

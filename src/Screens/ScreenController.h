@@ -28,9 +28,10 @@ void setup();
 void update();
 
 /**
- * @brief Resets the editField in the selected screen
+ * @brief Resets the edit mode.
+ * Sets the editfield to 0 and blink to false
  */
-void resetEditField(); //TODO: MAKE ENUM
+void resetEditMode(); //TODO: MAKE ENUM
 
 /**
  * @brief updates the EditField so it can alert the necessary displays about editing
@@ -52,11 +53,18 @@ void SSDraw(const uint8_t* arr);
 void LASendToBuffer(const char* str, const bool reset = false);
 
 /**
- * @brief Sets the blink variable
- *
+ * @brief Sets the blink variable.
+ * If true, starts the blinking process
  * @param val - value
  */
 void setBlink(const bool val);
+
+/**
+ * @brief Set the blinkVal
+ * If true, the screen is on. Usually used to force an initial state
+ * @param val
+ */
+void setBlinkVal(const bool val);
 
 /**
  * @brief Get the Current EditField value
