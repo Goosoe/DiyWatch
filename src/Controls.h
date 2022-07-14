@@ -25,8 +25,6 @@ void setup();
 
 /**
  * @brief Checks for input values and invokes the observer function
- *
- * @param time
  * @param observer function to be invoked after checking for commands
  */
 void update(void(*observer)(COMMAND));
