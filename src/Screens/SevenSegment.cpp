@@ -40,7 +40,6 @@ uint32_t lastUpdate = 0;  // time in ms
 
 uint8_t row = 0;  // current row to draw
 uint8_t previousRow = 0;
-uint16_t numberToDraw = 0;
 uint8_t editableDigits = 0;  // 0 = hours digits, 1 = minutes digits TODO: Switch this to Screen Controller
 
 uint8_t numsToDraw[DISPLAY_DIGITS - 1] = { 0 };
@@ -48,7 +47,7 @@ uint8_t numsToDraw[DISPLAY_DIGITS - 1] = { 0 };
 bool screenOn = true;
 bool clkDiv = true;
 
-bool blink = true;     //true = display on
+bool partialScreenPower = true;     //true = display on
 // bool blinkVal = false;   // time in ms
 
 void setup() {
@@ -62,26 +61,28 @@ void setup() {
 }
 
 /**
- * @brief updates the number to draw in the specific digit
+ * @brief get the number to draw in the specific digit
  * @param number
  * @param digit - position [0,4]
  */
-void updateNumberToDraw(const uint8_t number, const uint8_t digit) {
-    numberToDraw = 0;
+uint16_t getNumberToDraw(const uint8_t number, const uint8_t digit) {
     if (!screenOn) {
-        return;
+        return 0;
+    }
+    if (row == DISPLAY_DIGITS - 1) {    //if clock divider
+        return CLOCK_DIVIDER | getDigitPosition(digit);
     }
 
-    if (!blink) {
+    if (!partialScreenPower) {
         switch (editableDigits) {
         case 0:  // hours digits
             if (digit == 0 || digit == 1) {
-                return;
+                return 0;
             }
             break;
         case 1:  // minutes digits
             if (digit == 2 || digit == 3) {
-                return;
+                return 0;
             }
             break;
         default:
@@ -89,7 +90,7 @@ void updateNumberToDraw(const uint8_t number, const uint8_t digit) {
         }
     }
 
-    numberToDraw = getDigit(number) | getDigitPosition(digit);
+    return getDigit(number) | getDigitPosition(digit);
 }
 
 void setNumbers(const uint8_t* numberArr) {
@@ -100,7 +101,17 @@ void setNumbers(const uint8_t* numberArr) {
     }
 }
 
+void writeSR(const uint16_t val) {
+    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
+    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
 
+    shiftOut(DS, SHCP, LSBFIRST, val);
+    shiftOut(DS, SHCP, LSBFIRST, val >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
+
+    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
+    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
+
+}
 uint16_t getDigit(const uint8_t num) {
     switch (num) {
     case 0:
@@ -165,23 +176,7 @@ void update() {
         return;
     }
 
-    // TODO: there must be a way to upgrade the if/else
-    if (row != DISPLAY_DIGITS - 1) {
-        updateNumberToDraw(numsToDraw[row], row);
-    }
-    else {  // draw clockDivider
-        updateNumberToDraw(10, row);
-    }
-
-    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
-    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
-
-    shiftOut(DS, SHCP, LSBFIRST, numberToDraw);
-    shiftOut(DS, SHCP, LSBFIRST, numberToDraw >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
-
-    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
-    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
-
+    writeSR(getNumberToDraw(numsToDraw[row], row));
     row = (row + 1) % moduloDiv;
     previousRow = row;
     lastUpdate = time;
@@ -191,8 +186,8 @@ void setScreenPower(const bool on) {
     screenOn = on;
 }
 
-void setBlink(const bool val) {
-    blink = val;
+void setPartialScreenPower(const bool val) {
+    partialScreenPower = val;
 }
 void toggleClockDivider() {
     clkDiv = !clkDiv;

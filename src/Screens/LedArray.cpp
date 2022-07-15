@@ -43,8 +43,6 @@ uint32_t lastBufferUpdate = 0;   // time in ms
 
 uint8_t row = 0;  // current row to draw
 bool screenOn = true;
-bool blink = false;
-
 /**
  * @brief structure with info for the double buffer
  */
@@ -159,6 +157,22 @@ uint16_t getRow(const uint8_t rowNum) {
     }
 }
 
+/**
+ * @brief Write a 16bit into the Shift Register
+ *
+ * @param byteVal
+ */
+void writeSR(const uint16_t val) {
+    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
+    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
+
+    shiftOut(DS, SHCP, LSBFIRST, val);    //TODO: improve this SR
+    shiftOut(DS, SHCP, LSBFIRST, val >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
+
+    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
+    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
+}
+
 void setup() {
     // prepare Shift Registers
     pinMode(DS, OUTPUT);
@@ -171,6 +185,9 @@ void setup() {
 }
 
 void update() {
+    if (!screenOn) {
+        return;
+    }
     const uint32_t time = millis();
     if (time < lastUpdate) {  // Saves from the time eventual overflow
         lastUpdate = time;
@@ -194,24 +211,18 @@ void update() {
         return;
     }
 
-    digitalWrite(CLOCK_CONTROLLER_PIN, HIGH);
-    digitalWrite(STCP, LOW);  // IMPORTANT: STCP MUST BE LOW TO RECEIVE DATA
-
-    uint16_t byteVal = getBufferData(row) | getRow(row); //| R_ONE;
-
-    shiftOut(DS, SHCP, LSBFIRST, byteVal);    //TODO: improve this SR
-    shiftOut(DS, SHCP, LSBFIRST, byteVal >> 8);  // Using a daisy chained 2x8 bit 74HC595N requires a shift right
-
-    digitalWrite(STCP, HIGH);  // IMPORTANT: STCP MUST BE HIGH TO SEND DATA
-    digitalWrite(CLOCK_CONTROLLER_PIN, LOW);
+    writeSR(getBufferData(row) | getRow(row));
 
     row = (row + 1) % ROWS;
     lastUpdate = time;
 }
 
 
-void setScreenPower(const bool on) {
-    screenOn = on;
+void setScreenPower(const bool value) {
+    if (!value) {
+        writeSR(0);
+    }
+    screenOn = value;
 }
 
 void sendToBuffer(const char* text, const bool reset) {

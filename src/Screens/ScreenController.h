@@ -11,7 +11,10 @@
 
 namespace screenController {
 
-const uint8_t MAX_EDITABLE_FIELDS = 2;  //TODO: update when adding more displays
+const uint8_t SEVEN_SEG_FIELDS = 2;
+const uint8_t LED_ARR_FIELDS = 1;
+
+const uint8_t MAX_EDITABLE_FIELDS = SEVEN_SEG_FIELDS + LED_ARR_FIELDS;  //TODO: update when adding more displays
 
 // pins that control the NPN transistor that opens the clock to the specific display
 /**
@@ -35,8 +38,9 @@ void resetEditMode(); //TODO: MAKE ENUM
 
 /**
  * @brief updates the EditField so it can alert the necessary displays about editing
+ * @return the new editField value
  */
-void incrementEditField();
+uint8_t incrementEditField();
 
 /**
  * @brief Sends an array (of size 4) to the seven-segment screen to be drawn

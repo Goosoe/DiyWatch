@@ -26,11 +26,11 @@ void update() { //TODO: state mode must be specific to different modules
         }
         if (time - lastBlink > BLINK_TIME) {
 
-            if (editableField < 2) {   //0 = hours, 1 = minutes //TODO: magic numbers
-                svnSeg::setBlink(blinkVal);
+            if (editableField < SEVEN_SEG_FIELDS) {   //0 = hours, 1 = minutes //TODO: magic numbers
+                svnSeg::setPartialScreenPower(blinkVal);
             }
             else {
-                // ledArr::setBlink(on);
+                ledArr::setScreenPower(blinkVal);
             }
             blinkVal = !blinkVal;
             lastBlink = time;
@@ -47,23 +47,28 @@ void update() { //TODO: state mode must be specific to different modules
 void setEditableField(const uint8_t field) {
     editableField = field;
     blinkVal = true;
-    if (editableField < 2) {   //0 = hours, 1 = minutes //TODO: magic numbers
-        svnSeg::setEditableField(min(editableField, MAX_EDITABLE_FIELDS));
+    if (editableField < SEVEN_SEG_FIELDS) {   //0 = hours, 1 = minutes //TODO: magic numbers
+        ledArr::setScreenPower(true);
+        svnSeg::setEditableField(editableField);
     }
     else {
-        //todo
+        svnSeg::setPartialScreenPower(true);
+        svnSeg::setEditableField(0);
+        ledArr::setScreenPower(false);
     }
 }
 
 void resetEditMode() {
     setEditableField(0);
-    svnSeg::setBlink(false);
-    // ledArr::setBlink(false); todo uncomment
+    svnSeg::setPartialScreenPower(true);
     blink = false;
 }
-void incrementEditField() {
-    setEditableField((editableField + 1) % MAX_EDITABLE_FIELDS);
-    setBlinkVal(false);
+
+uint8_t incrementEditField() {
+    uint8_t nextField = (editableField + 1) % MAX_EDITABLE_FIELDS;
+    setEditableField(nextField);
+    lastBlink = millis();
+    return nextField;
 }
 
 void SSDraw(const uint8_t* timeArr) {
@@ -80,9 +85,7 @@ void setBlink(const bool val) {
 }
 
 void setBlinkVal(const bool val) {
-    blinkVal = val;
-    svnSeg::setBlink(val);
-    // ledArr::setBlink(false);
+    svnSeg::setPartialScreenPower(val);
 }
 
 uint8_t getEditField() {

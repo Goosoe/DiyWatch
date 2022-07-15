@@ -63,11 +63,11 @@ void update();
 void setScreenPower(const bool val);
 
 /**
- * @brief Set the Blink variable
- *
+ * @brief Set the the power of partial screen on (true)
+ * or off (false). If off, it turns off the digits present in the selected editable field
  * @param val
  */
-void setBlink(const bool val);
+void setPartialScreenPower(const bool val);
 
 /**
  * @brief Sets the Editable Field. This value is used to know which of the digits are supposed to be edited
