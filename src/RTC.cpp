@@ -17,6 +17,9 @@ const uint8_t YEAR_REG = 0x06;
 const uint8_t CONTROL_REG = 0x07;
 const uint8_t OSC_TRIM_REG = 0x08;
 
+const uint8_t DAYS_IN_WEEK = 7;
+const uint16_t STARTING_YEAR = 2020;
+
 void setup() {
     Wire.begin();
     Wire.setClock(100000);    // 10kHz is the default I2C communication frequency
@@ -85,15 +88,15 @@ void writeBit(const uint8_t address, const uint8_t pos, const uint8_t bit) {
 }
 
 void addHour() {
-    uint8_t ones, tens = 0;
     uint8_t addr = readByte(HOUR_REG);
 
-    ones = addr & 0xF;          // get bit 0 to 3
-    tens = (addr >> 4) & 0x3;  // get bit 4 and 5
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 and 5
+    uint8_t bit_mask = 0b00111111;
+
     switch (ones) {
     case 3:
         if (tens == 2) {
-            int8_t bit_mask = 0b00111111;
             addr = addr & (~bit_mask);    // resets the hour ones and tens to 0
         }
         else {
@@ -103,7 +106,6 @@ void addHour() {
 
     case 9: {
         tens = (tens + 1) << 4;
-        int8_t bit_mask = 0b00111111;
         addr = (addr & (~bit_mask)) | tens;     // resets the hour ones to 0 and sets the new tens value
     }
           break;
@@ -115,22 +117,19 @@ void addHour() {
 }
 
 void addMinute() {  //TODO: reset seconds when minute is added?
-
-    uint8_t ones, tens = 0;
     uint8_t addr = readByte(MIN_REG);
 
-    ones = addr & 0xF;          // get bit 0 to 3
-    tens = (addr >> 4) & 0x7;  // get bit 4 to 6
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x7;  // get bit 4 to 6
+    int8_t bit_mask = 0b01111111;
 
     switch (ones) {
     case 9:
         if (tens == 5) {
-            int8_t bit_mask = 0b01111111;
             addr = addr & (~bit_mask);    // resets minute hour ones and tens to 0
         }
         else {
             tens = (tens + 1) << 4;
-            int8_t bit_mask = 0b01111111;
             addr = (addr & (~bit_mask)) | tens;     // resets the minute ones to 0 and sets the new tens value
         }
         break;
@@ -140,5 +139,74 @@ void addMinute() {  //TODO: reset seconds when minute is added?
     }
     writeByte(MIN_REG, addr);
 }
+
+uint8_t getWeekDay() {
+    return  readByte(WEEK_DAY_REG) & 0x7;
+}
+
+uint8_t addWeekDay() {
+    writeByte(WEEK_DAY_REG, (getWeekDay() + 1) % DAYS_IN_WEEK);
+}
+
+uint8_t getMonth() {
+    uint8_t addr = readByte(MONTH_REG);
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x1;  // get bit 4
+    return tens * 10 + ones;
+
+}
+
+uint8_t addMonth() {
+    uint8_t addr = readByte(MONTH_REG);
+
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x1;  // get bit 4
+    uint8_t bit_mask = 0b00011111;
+
+    switch (ones) {
+    case 2:
+        if (tens == 1) {
+            addr = addr & (~bit_mask);    // resets month to 0
+        }
+    default:
+        addr++;
+        break;
+    }
+    writeByte(MIN_REG, addr);
+}
+
+uint8_t getYear() {
+    uint8_t addr = readByte(YEAR_REG);
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0xA;  // get bit 4 to 7
+    return +tens * 10 + ones;
+}
+
+uint8_t addYear() {
+    uint8_t addr = readByte(YEAR_REG);
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0xF;  // get bit 4 to 6
+    uint8_t bit_mask = 0b11111111;
+
+    switch (ones) {
+    case 9:
+        if (tens == 15) {
+            addr = addr & (~bit_mask);    // resets ones and tens to 0
+        }
+        else {
+            tens = (tens + 1) << 4;
+            addr = (addr & (~bit_mask)) | tens;     // resets the minute ones to 0 and sets the new tens value
+        }
+        break;
+    default:
+        addr++;
+        break;
+    }
+    writeByte(YEAR_REG, addr);
+}
+
+
+
+
 
 };  // namespace mcpRtc

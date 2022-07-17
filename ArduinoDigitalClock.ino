@@ -65,11 +65,11 @@ void evalCommand(controls::COMMAND comm) {
                 switch (screenController::getEditField()) {
                 case 0:
                     mcpRtc::addHour();
-                    screenController::setBlinkVal(false);   //to update blink timer
+                    screenController::setBlinkVal(true);   //to update blink timer
                     break;
                 case 1:
                     mcpRtc::addMinute();
-                    screenController::setBlinkVal(false);   //to update blink timer
+                    screenController::setBlinkVal(true);   //to update blink timer
                 default:
                     break;
                 }
@@ -125,9 +125,17 @@ void loop() {
 
     //TODO: put in a function
     switch (stateController::state) {
-    case stateUtil::STATE::TIME:
-        screenController::LASendToBuffer("mon 21 22", stateController::switchState);
+    case stateUtil::STATE::TIME: {
+        String test(mcpRtc::getWeekDay());
+        test.concat(" ");
+        test.concat(mcpRtc::getMonth());
+        test.concat(" ");
+        test.concat(mcpRtc::getYear());
+        //TODO: DEBUG + optimize
+        screenController::LASendToBuffer(test.c_str(), stateController::switchState); // TODO
+        // "mon 21 22", stateController::switchState);
         break;
+    }
     case stateUtil::STATE::SENSORS:
         screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::switchState);
         break;

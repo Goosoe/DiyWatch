@@ -58,6 +58,21 @@ void addHour();
  */
 void addMinute();
 
-// void increaseTime(uint8_t* arr, uint8_t size);
+// TODO: 
+
+uint8_t getWeekDay();
+
+uint8_t addWeekDay();
+
+uint8_t getMonth();
+
+uint8_t addMonth();
+
+uint8_t getYear();
+
+uint8_t addYear();
+
+
+
 
 };  // namespace mcpRtc
