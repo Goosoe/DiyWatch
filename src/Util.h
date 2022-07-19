@@ -4,6 +4,8 @@
  * @brief This file has all enums and functions required for multiple files
  */
 #pragma once
+#include <stdint.h>
+
 namespace stateUtil {
 enum MODE {
     READ,
@@ -17,28 +19,7 @@ enum STATE {
     CHRONOMETER,
     ALARM
 };
-}; // namespace stateUtil
-// # pragma once
-// namespace util {
-// char* numToDayWeek(uint8_t val) {
-//     char day[3] = { " " };
-//     switch (val) {
-//     case 1:
-//         return strcpy(day, "MON");
-//     case 2:
-//         return strcpy(day, "TUE");
-//     case 3:
-//         return strcpy(day, "WED");
-//     case 4:
-//         return strcpy(day, "THU");
-//     case 5:
-//         return strcpy(day, "FRI");
-//     case 6:
-//         return strcpy(day, "SAT");
-//     case 7:
-//         return strcpy(day, "SUN");
-//     default:
-//         return day;
-//     }
-// }
-// }; // namespace util
+};// namespace stateUtil
+namespace util {
+void createDate(char* dateArr, const uint8_t day, const uint8_t weekDay, const uint8_t month, const uint16_t year);
+}; // namespace util

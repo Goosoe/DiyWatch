@@ -62,17 +62,18 @@ void addMinute();
 
 uint8_t getWeekDay();
 
-uint8_t addWeekDay();
+void addWeekDay();
 
 uint8_t getMonth();
 
-uint8_t addMonth();
+void addMonth();
 
-uint8_t getYear();
+uint16_t getYear();
 
-uint8_t addYear();
+void addYear();
 
+void addDate();
 
-
-
+uint8_t getDate();
+//TODO: reset year
 };  // namespace mcpRtc

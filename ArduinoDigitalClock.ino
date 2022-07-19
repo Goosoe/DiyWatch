@@ -9,9 +9,9 @@ const uint8_t SIZE = 6;
 uint8_t timeArr[SIZE] = { 0 };
 
 namespace stateController {
-
+const uint8_t DATE_SIZE = 13;
 uint8_t state, mode = 0;
-
+char date[DATE_SIZE] = { 0 };
 bool switchState = false;
 /**
  * @brief Resets all the blink information when going back to read mode
@@ -38,6 +38,9 @@ void evalCommand(controls::COMMAND comm) {
                 if (screenController::incrementEditField() < screenController::SEVEN_SEG_FIELDS) {
                     screenController::setBlinkVal(false);
                 }
+                else { // Time edit in Led Array
+
+                }
             }
         }
         break;
@@ -63,16 +66,26 @@ void evalCommand(controls::COMMAND comm) {
             }
             else if (stateUtil::MODE::EDIT == mode) {
                 switch (screenController::getEditField()) {
-                case 0:
+                case 0: // edit hour field
                     mcpRtc::addHour();
-                    screenController::setBlinkVal(true);   //to update blink timer
                     break;
                 case 1:
                     mcpRtc::addMinute();
-                    screenController::setBlinkVal(true);   //to update blink timer
+                    break;
+                case 2:
+                    mcpRtc::addWeekDay();
+                    break;
+                case 3:
+                    mcpRtc::addMonth();
+                    break;
+                case 4:
+                    mcpRtc::addYear();
+                    break;
                 default:
                     break;
                 }
+                screenController::setBlinkVal(true);
+                prepareDate();
             }
         }
         break;
@@ -89,9 +102,21 @@ void evalCommand(controls::COMMAND comm) {
                     break;
                 case 1:
                     mcpRtc::addMinute();
+                    break;
+                case 2:
+                    mcpRtc::addWeekDay();
+                    break;
+                case 3:
+                    mcpRtc::addMonth();
+                    break;
+                case 4:
+                    mcpRtc::addYear();
+                    break;
                 default:
                     break;
                 }
+                screenController::setBlinkVal(true);
+                prepareDate();
             }
         }
         break;
@@ -99,6 +124,11 @@ void evalCommand(controls::COMMAND comm) {
         break;
     }
 }
+
+void prepareDate() {
+    util::createDate(date, mcpRtc::getDate(), mcpRtc::getWeekDay(), mcpRtc::getMonth(), mcpRtc::getYear());
+}
+
 }; //  namespace stateController
 
 
@@ -110,6 +140,7 @@ void setup() {
     mcpRtc::setup();
     controls::setup();
     sensors::setup();
+    stateController::prepareDate();
     Serial.begin(9600); // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
 }
 
@@ -126,13 +157,8 @@ void loop() {
     //TODO: put in a function
     switch (stateController::state) {
     case stateUtil::STATE::TIME: {
-        String test(mcpRtc::getWeekDay());
-        test.concat(" ");
-        test.concat(mcpRtc::getMonth());
-        test.concat(" ");
-        test.concat(mcpRtc::getYear());
         //TODO: DEBUG + optimize
-        screenController::LASendToBuffer(test.c_str(), stateController::switchState); // TODO
+        screenController::LASendToBuffer(stateController::date, stateController::switchState); // TODO prepare date shouldnt be called every time
         // "mon 21 22", stateController::switchState);
         break;
     }

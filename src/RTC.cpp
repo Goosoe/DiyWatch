@@ -141,10 +141,9 @@ void addMinute() {  //TODO: reset seconds when minute is added?
 }
 
 uint8_t getWeekDay() {
-    return  readByte(WEEK_DAY_REG) & 0x7;
+    return readByte(WEEK_DAY_REG) & 0x7;
 }
-
-uint8_t addWeekDay() {
+void addWeekDay() {
     writeByte(WEEK_DAY_REG, (getWeekDay() + 1) % DAYS_IN_WEEK);
 }
 
@@ -156,7 +155,7 @@ uint8_t getMonth() {
 
 }
 
-uint8_t addMonth() {
+void addMonth() {
     uint8_t addr = readByte(MONTH_REG);
 
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
@@ -175,14 +174,14 @@ uint8_t addMonth() {
     writeByte(MIN_REG, addr);
 }
 
-uint8_t getYear() {
+uint16_t getYear() {
     uint8_t addr = readByte(YEAR_REG);
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
-    uint8_t tens = (addr >> 4) & 0xA;  // get bit 4 to 7
-    return +tens * 10 + ones;
+    uint8_t tens = (addr >> 4) & 0xF;  // get bit 4 to 7
+    return 2020 + tens * 10 + ones;
 }
 
-uint8_t addYear() {
+void addYear() {
     uint8_t addr = readByte(YEAR_REG);
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0xF;  // get bit 4 to 6
@@ -205,8 +204,36 @@ uint8_t addYear() {
     writeByte(YEAR_REG, addr);
 }
 
+void addDate() {
+    uint8_t addr = readByte(DATE_REG);
 
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 and 5
+    uint8_t bit_mask = 0b00111111;
 
+    switch (ones) {
+    case 1: {
+        if (tens == 3) {
+            addr = addr & (~bit_mask);    // resets the hour ones and tens to 0
+        }
+        break;
+    }
+    case 9: {
+        tens = (tens + 1) << 4;
+        addr = (addr & (~bit_mask)) | tens;     // resets the ones to 0 and sets the new tens value
+        break;
+    }
+    default:
+        addr++;
+        break;
+    }
+    writeByte(DATE_REG, addr);
+}
 
-
+uint8_t getDate() {
+    uint8_t addr = readByte(DATE_REG);
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 to 7
+    return tens * 10 + ones;
+}
 };  // namespace mcpRtc

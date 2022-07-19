@@ -65,7 +65,7 @@ void resetEditMode() {
 }
 
 uint8_t incrementEditField() {
-    uint8_t nextField = (editableField + 1) % MAX_EDITABLE_FIELDS;
+    uint8_t nextField = (editableField + 1) % MAX_EDITABLE_FIELDS_TIME; //TODO: change this when adding different editable fields
     setEditableField(nextField);
     lastBlink = millis();
     return nextField;

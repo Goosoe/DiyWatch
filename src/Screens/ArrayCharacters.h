@@ -2,6 +2,7 @@
  * @file ArrayCharacters.h
  * @brief Has the array representation of any relevant character needed to print on the LED Array
  */
+#pragma once
 #include <stdint.h>
 
 namespace arrayChar {
