@@ -12,7 +12,7 @@
 namespace screenController {
 
 const uint8_t SEVEN_SEG_FIELDS = 2;
-const uint8_t LED_ARR_FIELDS_TIME = 3;
+const uint8_t LED_ARR_FIELDS_TIME = 4;
 
 const uint8_t MAX_EDITABLE_FIELDS_TIME = SEVEN_SEG_FIELDS + LED_ARR_FIELDS_TIME;  //TODO: update when adding more displays - DEPENDS ON WHICH SCREEN WE'RE USING
 

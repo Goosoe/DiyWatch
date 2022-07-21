@@ -88,17 +88,17 @@ void numToMonth(uint8_t val, char* out, uint8_t& index) { // TODO: not good
     index += DEFAULT_SIZE;
 }
 void numToChar(uint16_t val, char* out, uint8_t& index) {
-    const uint8_t YEAR_SIZE = 2;
-    for (int8_t i = YEAR_SIZE - 1; i >= 0; i--) {
+    const uint8_t MAX_SIZE = 2;
+    for (int8_t i = MAX_SIZE - 1; i >= 0; i--) {
         out[index + i] = val % 10 + '0';
         val /= 10;
     }
-    index += YEAR_SIZE;
+    index += MAX_SIZE;
 }
 
 void createDate(char* dateArr, const uint8_t day, const uint8_t weekDay, const uint8_t month, const uint16_t year) {
     uint8_t index = 0;
-    numToDayWeek(day, dateArr, index);
+    numToChar(day, dateArr, index);
     numToDayWeek(weekDay, dateArr, index);
     numToMonth(month, dateArr, index);
     numToChar(year, dateArr, index);

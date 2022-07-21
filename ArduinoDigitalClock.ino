@@ -12,13 +12,17 @@ namespace stateController {
 const uint8_t DATE_SIZE = 13;
 uint8_t state, mode = 0;
 char date[DATE_SIZE] = { 0 };
-bool switchState = false;
+bool updateLA = false;
 /**
  * @brief Resets all the blink information when going back to read mode
  *
  */
 void resetBlink() {
     screenController::resetEditMode();
+}
+
+void prepareDate() {
+    util::createDate(date, mcpRtc::getDate(), mcpRtc::getWeekDay(), mcpRtc::getMonth(), mcpRtc::getYear());
 }
 
 /**
@@ -31,15 +35,16 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B1_PRESS:
         if (stateUtil::MODE::READ == mode) {
             state = (state + 1) % (stateUtil::STATE::ALARM + 1);
-            switchState = true;
+            updateLA = true;
         }
         else if (stateUtil::MODE::EDIT == mode) {
             if (stateUtil::STATE::TIME == state) {
                 if (screenController::incrementEditField() < screenController::SEVEN_SEG_FIELDS) {
                     screenController::setBlinkVal(false);
+                    screenController::LASendToBuffer(stateController::date, stateController::updateLA);
                 }
                 else { // Time edit in Led Array
-
+                    updateLA = true;
                 }
             }
         }
@@ -65,6 +70,9 @@ void evalCommand(controls::COMMAND comm) {
                 //TODO:
             }
             else if (stateUtil::MODE::EDIT == mode) {
+                if (screenController::getEditField() >= screenController::SEVEN_SEG_FIELDS) {
+                    updateLA = true;
+                }
                 switch (screenController::getEditField()) {
                 case 0: // edit hour field
                     mcpRtc::addHour();
@@ -73,17 +81,21 @@ void evalCommand(controls::COMMAND comm) {
                     mcpRtc::addMinute();
                     break;
                 case 2:
-                    mcpRtc::addWeekDay();
+                    mcpRtc::addDate();
                     break;
                 case 3:
-                    mcpRtc::addMonth();
+                    mcpRtc::addWeekDay();
                     break;
                 case 4:
+                    mcpRtc::addMonth();
+                    break;
+                case 5:
                     mcpRtc::addYear();
                     break;
                 default:
                     break;
                 }
+
                 screenController::setBlinkVal(true);
                 prepareDate();
             }
@@ -96,38 +108,14 @@ void evalCommand(controls::COMMAND comm) {
                 //TODO:
             }
             else if (stateUtil::MODE::EDIT == mode) {   //TODO: thread addhour & addminute?
-                switch (screenController::getEditField()) {     //TODO: Hold button is the same as press right nonw
-                case 0: // edit hour field
-                    mcpRtc::addHour();
-                    break;
-                case 1:
-                    mcpRtc::addMinute();
-                    break;
-                case 2:
-                    mcpRtc::addWeekDay();
-                    break;
-                case 3:
-                    mcpRtc::addMonth();
-                    break;
-                case 4:
-                    mcpRtc::addYear();
-                    break;
-                default:
-                    break;
-                }
-                screenController::setBlinkVal(true);
-                prepareDate();
             }
+            break;
         }
-        break;
     default:
         break;
     }
 }
 
-void prepareDate() {
-    util::createDate(date, mcpRtc::getDate(), mcpRtc::getWeekDay(), mcpRtc::getMonth(), mcpRtc::getYear());
-}
 
 }; //  namespace stateController
 
@@ -158,28 +146,47 @@ void loop() {
     switch (stateController::state) {
     case stateUtil::STATE::TIME: {
         //TODO: DEBUG + optimize
-        screenController::LASendToBuffer(stateController::date, stateController::switchState); // TODO prepare date shouldnt be called every time
-        // "mon 21 22", stateController::switchState);
+        if (stateUtil::MODE::READ == stateController::mode) {
+            //TODO: dont update date every loop.
+            screenController::LASendToBuffer(stateController::date, stateController::updateLA);
+        }
+        else {
+            switch (screenController::getEditField()) {
+            case 2:
+                screenController::LASendToBuffer(String(mcpRtc::getDate()).c_str(), stateController::updateLA);
+                break;
+            case 3:
+                screenController::LASendToBuffer(String(mcpRtc::getWeekDay()).c_str(), stateController::updateLA);
+                break;
+            case 4:
+                screenController::LASendToBuffer(String(mcpRtc::getMonth()).c_str(), stateController::updateLA);
+                break;
+            case 5:
+                screenController::LASendToBuffer(String(mcpRtc::getYear()).c_str(), stateController::updateLA);
+                break;
+            default:
+                break;
+            }
+        }
         break;
     }
     case stateUtil::STATE::SENSORS:
-        screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::switchState);
+        screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::updateLA);
         break;
 
     case stateUtil::STATE::CHRONOMETER:
-        screenController::LASendToBuffer("3", stateController::switchState);
-        screenController::LASendToBuffer("4");
+        screenController::LASendToBuffer("alarm", stateController::updateLA);
         break;
 
     case stateUtil::STATE::ALARM:
-        screenController::LASendToBuffer("mn", stateController::switchState);
+        screenController::LASendToBuffer("Alarm", stateController::updateLA);
         break;
 
     default:
         break;
     }
-    if (stateController::switchState) {
-        stateController::switchState = false;
+    if (stateController::updateLA) {
+        stateController::updateLA = false;
     }
 }
 

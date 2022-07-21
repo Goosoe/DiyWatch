@@ -17,7 +17,6 @@ const uint8_t YEAR_REG = 0x06;
 const uint8_t CONTROL_REG = 0x07;
 const uint8_t OSC_TRIM_REG = 0x08;
 
-const uint8_t DAYS_IN_WEEK = 7;
 const uint16_t STARTING_YEAR = 2020;
 
 void setup() {
@@ -143,8 +142,9 @@ void addMinute() {  //TODO: reset seconds when minute is added?
 uint8_t getWeekDay() {
     return readByte(WEEK_DAY_REG) & 0x7;
 }
+
 void addWeekDay() {
-    writeByte(WEEK_DAY_REG, (getWeekDay() + 1) % DAYS_IN_WEEK);
+    writeByte(WEEK_DAY_REG, (getWeekDay() % 7 + 1));    //7 days in the week
 }
 
 uint8_t getMonth() {
@@ -161,17 +161,19 @@ void addMonth() {
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0x1;  // get bit 4
     uint8_t bit_mask = 0b00011111;
-
+    addr++; //added here to prevent defaults and repetition
     switch (ones) {
     case 2:
         if (tens == 1) {
-            addr = addr & (~bit_mask);    // resets month to 0
+            addr = addr & (~bit_mask) | 0x1;    // resets month to 1
         }
-    default:
-        addr++;
+        break;
+    case 9: {
+        addr = (tens + 1) << 4;   // resets the ones to 0 and sets the new tens value
         break;
     }
-    writeByte(MIN_REG, addr);
+    }
+    writeByte(MONTH_REG, addr);    //12 months in a year
 }
 
 uint16_t getYear() {
@@ -186,20 +188,19 @@ void addYear() {
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0xF;  // get bit 4 to 6
     uint8_t bit_mask = 0b11111111;
+    addr++; //added here to prevent defaults and repetition
 
     switch (ones) {
-    case 9:
+    case 9: {
         if (tens == 15) {
-            addr = addr & (~bit_mask);    // resets ones and tens to 0
+            addr = addr & (~bit_mask) | 0x1;    // resets ones to 1 and tens to 0
         }
         else {
             tens = (tens + 1) << 4;
             addr = (addr & (~bit_mask)) | tens;     // resets the minute ones to 0 and sets the new tens value
         }
         break;
-    default:
-        addr++;
-        break;
+    }
     }
     writeByte(YEAR_REG, addr);
 }
@@ -210,22 +211,18 @@ void addDate() {
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 and 5
     uint8_t bit_mask = 0b00111111;
-
+    addr++; //added here to prevent defaults and repetition of this sum
     switch (ones) {
     case 1: {
         if (tens == 3) {
-            addr = addr & (~bit_mask);    // resets the hour ones and tens to 0
+            addr = addr & (~bit_mask) | 0x1;    // resets the hour ones and tens to 1
         }
         break;
     }
     case 9: {
-        tens = (tens + 1) << 4;
-        addr = (addr & (~bit_mask)) | tens;     // resets the ones to 0 and sets the new tens value
+        addr = (tens + 1) << 4;     // resets the ones to 0 and sets the new tens value
         break;
     }
-    default:
-        addr++;
-        break;
     }
     writeByte(DATE_REG, addr);
 }
