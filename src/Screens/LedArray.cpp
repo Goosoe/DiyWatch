@@ -132,7 +132,6 @@ uint16_t getRow(const uint8_t rowNum) {
         return byteVal;
     }
     switch (row) {
-
     case 1:
         return R_TWO;
         break;
@@ -226,8 +225,10 @@ void setScreenPower(const bool value) {
 }
 
 void sendToBuffer(const char* text, const bool reset) {
+    //TODO: Sring to char buffer
+    //use \0 as a stop and sizeof
     String str = String(text);
-    str.toUpperCase();
+    //   str.toUpperCase();
     uint8_t nextBuffVal = nextBuffer();
 
     if (str == Buffer.bufferText[Buffer.currentBuffer] || str == Buffer.bufferText[nextBuffVal]

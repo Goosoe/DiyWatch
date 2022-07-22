@@ -95,7 +95,6 @@ void evalCommand(controls::COMMAND comm) {
                 default:
                     break;
                 }
-
                 screenController::setBlinkVal(true);
                 prepareDate();
             }
@@ -115,8 +114,6 @@ void evalCommand(controls::COMMAND comm) {
         break;
     }
 }
-
-
 }; //  namespace stateController
 
 
@@ -141,7 +138,6 @@ void loop() {
     mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
     screenController::SSDraw(timeArr);
     // screenController::LASendToBuffer("123456789");
-
     //TODO: put in a function
     switch (stateController::state) {
     case stateUtil::STATE::TIME: {
@@ -151,18 +147,24 @@ void loop() {
             screenController::LASendToBuffer(stateController::date, stateController::updateLA);
         }
         else {
+            char LAText[3] = { 0 };
+            uint8_t i = 0;
             switch (screenController::getEditField()) {
             case 2:
-                screenController::LASendToBuffer(String(mcpRtc::getDate()).c_str(), stateController::updateLA);
+                util::numToChar(mcpRtc::getDate(), LAText, i);
+                screenController::LASendToBuffer(LAText, stateController::updateLA);
                 break;
             case 3:
-                screenController::LASendToBuffer(String(mcpRtc::getWeekDay()).c_str(), stateController::updateLA);
+                util::numToDayWeek(mcpRtc::getWeekDay(), LAText, i);
+                screenController::LASendToBuffer(LAText, stateController::updateLA);
                 break;
             case 4:
-                screenController::LASendToBuffer(String(mcpRtc::getMonth()).c_str(), stateController::updateLA);
+                util::numToMonth(mcpRtc::getMonth(), LAText, i);
+                screenController::LASendToBuffer(LAText, stateController::updateLA);
                 break;
             case 5:
-                screenController::LASendToBuffer(String(mcpRtc::getYear()).c_str(), stateController::updateLA);
+                util::numToChar(mcpRtc::getYear(), LAText, i);
+                screenController::LASendToBuffer(LAText, stateController::updateLA);
                 break;
             default:
                 break;
@@ -175,13 +177,11 @@ void loop() {
         break;
 
     case stateUtil::STATE::CHRONOMETER:
-        screenController::LASendToBuffer("alarm", stateController::updateLA);
+        screenController::LASendToBuffer("CHRONO", stateController::updateLA);
         break;
-
     case stateUtil::STATE::ALARM:
-        screenController::LASendToBuffer("Alarm", stateController::updateLA);
+        screenController::LASendToBuffer("ALARM", stateController::updateLA);
         break;
-
     default:
         break;
     }

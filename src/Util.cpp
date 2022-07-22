@@ -87,6 +87,7 @@ void numToMonth(uint8_t val, char* out, uint8_t& index) { // TODO: not good
     }
     index += DEFAULT_SIZE;
 }
+
 void numToChar(uint16_t val, char* out, uint8_t& index) {
     const uint8_t MAX_SIZE = 2;
     for (int8_t i = MAX_SIZE - 1; i >= 0; i--) {

@@ -21,5 +21,12 @@ enum STATE {
 };
 };// namespace stateUtil
 namespace util {
+
+void numToDayWeek(const uint8_t val, char* out, uint8_t& index);// TODO: not good return
+
+void numToMonth(uint8_t val, char* out, uint8_t& index); // TODO: not good
+
+void numToChar(uint16_t val, char* out, uint8_t& index);
+
 void createDate(char* dateArr, const uint8_t day, const uint8_t weekDay, const uint8_t month, const uint16_t year);
 }; // namespace util

@@ -18,10 +18,14 @@ const int A[SIZE_OF_CHARS] = { 0b0111100000000000, 0b0001010000000000, 0b0111100
 const int D[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0100010000000000, 0b0011100000000000 };
 const int E[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0101010000000000, 0b0101010000000000 };
 const int F[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0001010000000000, 0b0001010000000000 };
+const int H[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0001000000000000, 0b0111110000000000 };
 const int J[SIZE_OF_CHARS] = { 0b0010010000000000, 0b0100010000000000, 0b0111110000000000 };
+const int L[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0000010000000000, 0b0000010000000000 };
 
 const int M[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0000100000000000, 0b0111110000000000 };
 const int N[SIZE_OF_CHARS] = { 0b0111100000000000, 0b0001000000000000, 0b0111100000000000 };
+const int P[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0001010000000000, 0b0001110000000000 };
+const int R[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0010010000000000, 0b0101110000000000 };
 const int T[SIZE_OF_CHARS] = { 0b0000010000000000, 0b0111110000000000, 0b0000010000000000 };
 const int U[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0100000000000000, 0b0111110000000000 };
 const int W[SIZE_OF_CHARS] = { 0b0111110000000000, 0b0010000000000000, 0b0111110000000000 };
@@ -119,10 +123,22 @@ CharArr toLEDChar(const char c) {
             F
         };
         break;
+    case 'H':
+        charArr = {
+            SIZE_OF_CHARS,
+            H
+        };
+        break;
     case 'J':
         charArr = {
             SIZE_OF_CHARS,
             J
+        };
+        break;
+    case 'L':
+        charArr = {
+            SIZE_OF_CHARS,
+            L
         };
         break;
     case 'M':
@@ -135,6 +151,18 @@ CharArr toLEDChar(const char c) {
         charArr = {
             SIZE_OF_CHARS,
             N
+        };
+        break;
+    case 'P':
+        charArr = {
+            SIZE_OF_CHARS,
+            P
+        };
+        break;
+    case 'R':
+        charArr = {
+            SIZE_OF_CHARS,
+            R
         };
         break;
     case 'T':

@@ -62,17 +62,17 @@ void addMinute();
 
 uint8_t getWeekDay();
 
-void addWeekDay();
+uint8_t addWeekDay();
 
 uint8_t getMonth();
 
-void addMonth();
+uint8_t addMonth();
 
 uint16_t getYear();
 
-void addYear();
+uint16_t addYear();
 
-void addDate();
+uint8_t addDate();
 
 uint8_t getDate();
 //TODO: reset year
