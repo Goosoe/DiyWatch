@@ -7,12 +7,13 @@
 
 const uint8_t SIZE = 6;
 uint8_t timeArr[SIZE] = { 0 };
+const uint8_t STARTING_YEAR = 20; //The year the clock displays + 1
 
 namespace stateController {
 const uint8_t DATE_SIZE = 13;
 uint8_t state, mode = 0;
 char date[DATE_SIZE] = { 0 };
-bool updateLA = false;
+bool updateLA = true;
 /**
  * @brief Resets all the blink information when going back to read mode
  *
@@ -41,7 +42,7 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::STATE::TIME == state) {
                 if (screenController::incrementEditField() < screenController::SEVEN_SEG_FIELDS) {
                     screenController::setBlinkVal(false);
-                    screenController::LASendToBuffer(stateController::date, stateController::updateLA);
+                    screenController::LASendToBuffer(stateController::date, true);
                 }
                 else { // Time edit in Led Array
                     updateLA = true;
@@ -61,6 +62,9 @@ void evalCommand(controls::COMMAND comm) {
         else if (stateUtil::MODE::EDIT == mode) {
             mode = stateUtil::MODE::READ;
             resetBlink();
+            if (stateUtil::STATE::TIME == state) {
+                screenController::LASendToBuffer(stateController::date, true);
+            }
         }
         break;
 

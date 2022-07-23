@@ -85,7 +85,13 @@ void setBlink(const bool val) {
 }
 
 void setBlinkVal(const bool val) {
-    svnSeg::setPartialScreenPower(val);
+    if (editableField < SEVEN_SEG_FIELDS) {   //0 = hours, 1 = minutes //TODO: magic numbers
+        svnSeg::setPartialScreenPower(val);
+    }
+    else {
+        ledArr::setScreenPower(val);
+    }
+    lastBlink = millis();
 }
 
 uint8_t getEditField() {

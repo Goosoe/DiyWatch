@@ -13,7 +13,7 @@ const uint8_t CLOCK_CONTROLLER_PIN = 6;
 
 const uint16_t REFRESH = 500;  // nr of updates per sec
 const float UPDATE_TIME = 1000 / REFRESH;
-const float UPDATE_BUFFER_TIME = 125; //ms
+const float UPDATE_BUFFER_TIME = 100; //ms
 
 // const uint16_t BLINK_TIME = 600;
 const uint8_t ROWS = 7;
@@ -43,6 +43,8 @@ uint32_t lastBufferUpdate = 0;   // time in ms
 
 uint8_t row = 0;  // current row to draw
 bool screenOn = true;
+// used to define if the text should slide or stay on screen
+bool slideText = true;
 /**
  * @brief structure with info for the double buffer
  */
@@ -51,7 +53,7 @@ struct Buffer {
     uint8_t currentBuffer = 0;
     String bufferText[NUM_OF_DISPLAY_BUFFERS] = { String() };
 
-    int8_t bufferIdx = -ROWS;
+    int8_t bufferIdx = -ROWS; // used as a comparison with bufferSize. When they are equal, we know the buffer has slid from right to left 
     uint8_t bufferSize[NUM_OF_DISPLAY_BUFFERS] = { 0 };
 
 } Buffer;
@@ -67,7 +69,14 @@ void initBuffer() {
  * @brief - resets the bufferIdx
  */
 void resetIdx() {
-    Buffer.bufferIdx = -ROWS;
+    if (Buffer.bufferText[Buffer.currentBuffer].length() <= 2) {
+        Buffer.bufferIdx = 0;
+        slideText = false;
+    }
+    else {
+        Buffer.bufferIdx = -ROWS;
+        slideText = true;
+    };
 }
 
 /**
@@ -82,7 +91,6 @@ void resetBuffer(uint8_t bufferId) {
     for (int i = 0; i < Buffer.bufferSize[bufferId]; i++) {
         Buffer.displayBuffer[bufferId][i] = 0;
     }
-    resetIdx();
     Buffer.bufferSize[bufferId] = 0;
     Buffer.bufferText[Buffer.currentBuffer] = "";
 }
@@ -96,15 +104,19 @@ int nextBuffer() {
 }
 
 /**
- * @brief updates the buffer if has next value or resets the idx
+ * @brief updates the buffer if spare buffer has next value or resets the idx
+ * to print again
  */
 void updateBuffer() {
-    if (Buffer.bufferSize[nextBuffer()] == 0) {
-        resetIdx();
-        return;
+    uint8_t currBuffSize = Buffer.bufferSize[Buffer.currentBuffer];
+    if (screenOn && Buffer.bufferIdx++ == currBuffSize) { // current display ended 
+        if (Buffer.bufferSize[nextBuffer()] == 0) {
+            resetIdx();
+            return;
+        }
+        resetBuffer(Buffer.currentBuffer);
+        Buffer.currentBuffer = nextBuffer();
     }
-    resetBuffer(Buffer.currentBuffer);
-    Buffer.currentBuffer = nextBuffer();
 }
 
 /**
@@ -114,7 +126,10 @@ void updateBuffer() {
  * @return uint16_t - data to show in specific  rowNum
  */
 uint16_t getBufferData(const uint8_t rowNum) {
-    int8_t idx = Buffer.bufferIdx + rowNum;
+    int8_t idx = rowNum;
+    if (slideText) { //if we want to slide the text, take into account the bufferIdx to do the sliding logic
+        idx += Buffer.bufferIdx;
+    }
     if (idx < 0 || idx > Buffer.bufferSize[Buffer.currentBuffer]) {
         return 0;
     }
@@ -193,16 +208,11 @@ void update() {
 
     }
     if (time < lastBufferUpdate) {  // Saves from the time eventual overflow
-
         lastBufferUpdate = time;
-
     }
 
     if (time - lastBufferUpdate > UPDATE_BUFFER_TIME) {
-        uint8_t currBuffSize = Buffer.bufferSize[Buffer.currentBuffer];
-        if (currBuffSize > 0 && Buffer.bufferIdx++ == currBuffSize + min(currBuffSize, ROWS)) { // current display ended 
-            updateBuffer();
-        }
+        updateBuffer();
         lastBufferUpdate = time;
     }
 
@@ -232,7 +242,7 @@ void sendToBuffer(const char* text, const bool reset) {
     uint8_t nextBuffVal = nextBuffer();
 
     if (str == Buffer.bufferText[Buffer.currentBuffer] || str == Buffer.bufferText[nextBuffVal]
-        || (!reset && Buffer.bufferSize[nextBuffer()] != 0)) {   //TODO: improve this
+        || (!reset && Buffer.bufferSize[nextBuffVal] != 0)) {   //TODO: improve this
         return;
     }
     Buffer.bufferText[nextBuffVal] = str;
@@ -247,12 +257,14 @@ void sendToBuffer(const char* text, const bool reset) {
         }
         idx += val.size;
         if (i + 1 < str.length()) { // if not last char
-            Buffer.displayBuffer[nextBuffVal][idx++] = 0; //add space betwenn chars
+            Buffer.displayBuffer[nextBuffVal][idx++] = 0; //add space between chars
         }
     }
     Buffer.bufferSize[nextBuffVal] = idx; // + 1;  //index starts at 0, the size is +1
     if (reset) {
-        updateBuffer();
+        resetBuffer(Buffer.currentBuffer);
+        Buffer.currentBuffer = nextBuffVal;
+        resetIdx();
     }
 }
 }; //namespace ledArr
