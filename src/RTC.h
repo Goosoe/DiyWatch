@@ -1,28 +1,13 @@
 /**
- * @file MCP7940.ino
+ * @file RTC.h
  * @author Goosoe
  * @brief
- * MCP7940 I2C comm library
- * This library is by far the most complete and was created so I could have a better understanding
- * of I2C and RTC IC's.
- * @copyright Copyright (c) 2022
+ * RTC library for the MCP7940M
  */
 #pragma once
 #include <stdint.h>
 
 namespace mcpRtc {
-const uint8_t RTC_ADRESS = 0x6F;  // RTC I2C adress
-
-/* TIME-KEEPING REGISTERS (Bytes)*/
-const uint8_t SEC_REG = 0x00;
-const uint8_t MIN_REG = 0x01;
-const uint8_t HOUR_REG = 0x02;
-const uint8_t WEEK_DAY_REG = 0x03;
-const uint8_t DATE_REG = 0x04;
-const uint8_t MONTH_REG = 0x05;
-const uint8_t YEAR_REG = 0x06;
-const uint8_t CONTROL_REG = 0x07;
-const uint8_t OSC_TRIM_REG = 0x08;
 
 /**
  * @brief Setup.
@@ -73,6 +58,22 @@ void addHour();
  */
 void addMinute();
 
-// void increaseTime(uint8_t* arr, uint8_t size);
+// TODO: 
 
+uint8_t getWeekDay();
+
+uint8_t addWeekDay();
+
+uint8_t getMonth();
+
+uint8_t addMonth();
+
+uint16_t getYear();
+
+uint16_t addYear();
+
+uint8_t addDate();
+
+uint8_t getDate();
+//TODO: reset year
 };  // namespace mcpRtc

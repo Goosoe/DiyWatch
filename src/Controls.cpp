@@ -5,6 +5,13 @@
 
 namespace controls {
 
+const uint8_t BUTTON_ONE = 11;
+const uint8_t BUTTON_TWO = 12;
+
+const uint16_t REFRESH = 250;  // updates every REFRESH ms
+const float UPDATE_TIME = 1000 / REFRESH;
+const float LONG_PRESS_TIME = 750;
+
 int lastUpdate = 0;       // time in ms
 int b1PressTimer = 0;  // 0 = off
 int b2PressTimer = 0;  // 0 = off
@@ -20,12 +27,13 @@ void setup() {
 
 
 //TODO: remove prints
-void update(int currentTime, void(*observer)(COMMAND)) {
-    if (currentTime <= lastUpdate) {      // Saves from the currentTime eventual overflow
-        lastUpdate = currentTime;
+void update(void(*observer)(COMMAND)) {
+    const uint32_t time = millis();
+    if (time < lastUpdate) {      // Saves from the time eventual overflow
+        lastUpdate = time;
     }
 
-    uint16_t timePassed = currentTime - lastUpdate;
+    uint32_t timePassed = time - lastUpdate;
     bool isUpdated = false;
     bool holdLock = false;
     COMMAND comm = COMMAND::NONE;
@@ -70,7 +78,7 @@ void update(int currentTime, void(*observer)(COMMAND)) {
         b2PressTimer = 0;
     }
     b2LastState = state;
-    lastUpdate = currentTime;
+    lastUpdate = time;
 
     if (isUpdated) {
         observer(comm);
