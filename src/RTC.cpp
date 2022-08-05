@@ -139,6 +139,13 @@ void addMinute() {  //TODO: reset seconds when minute is added?
     writeByte(MIN_REG, addr);
 }
 
+uint8_t getSeconds() {
+    uint8_t addr = readByte(SEC_REG);
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x7;  // get bit 4 to 6
+    return tens * 10 + ones;
+}
+
 uint8_t getWeekDay() {
     return readByte(WEEK_DAY_REG) & 0x7;
 }

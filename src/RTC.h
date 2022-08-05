@@ -60,6 +60,8 @@ void addMinute();
 
 // TODO: 
 
+uint8_t getSeconds();
+
 uint8_t getWeekDay();
 
 uint8_t addWeekDay();

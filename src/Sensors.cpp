@@ -40,12 +40,12 @@ void update() {
 
 uint8_t readTempSensor() {
     int reading = analogRead(TEMP_SENSOR);
-    float voltage = reading * (4750 / 1024.0);  // voltage being sent is around 4.75V and current is ~1.02 mA
-    currentTemp = round(voltage / 10 - 273.15 - TEMP_CALIBRATION_OFFSET); //convert from K to C and remove 10 to counter the offset
+    float voltage = reading * (4750 / 1024.0f);  // voltage being sent is around 4.75V and current is ~1.02 mA
+    currentTemp = round(voltage / 10 - 273.15f - TEMP_CALIBRATION_OFFSET); //convert from K to C and remove 10 to counter the offset
     return currentTemp;
 }
 
-int8_t getTemp() {
+uint8_t getTemp() {
     int16_t total = 0;
     for (uint8_t i = 0; i < TEMP_ARR_SIZE; i++) {
         total += tempData.avgTemp[i];

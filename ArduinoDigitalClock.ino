@@ -3,7 +3,6 @@
 #include "src/Screens/ScreenController.h"
 #include "src/Util.h"
 #include "src/Sensors.h"
-#include <string.h>
 
 const uint8_t SIZE = 6;
 uint8_t timeArr[SIZE] = { 0 };
@@ -177,13 +176,17 @@ void loop() {
         break;
     }
     case stateUtil::STATE::SENSORS:
-        screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::updateLA);
+        char* temp;
+        itoa(sensors::getTemp(), temp, 10);
+        screenController::LASendToBuffer(temp, stateController::updateLA);
         break;
 
     case stateUtil::STATE::CHRONOMETER:
+        //TODO: implement
         screenController::LASendToBuffer("CHRONO", stateController::updateLA);
         break;
     case stateUtil::STATE::ALARM:
+        //TODO: implement
         screenController::LASendToBuffer("ALARM", stateController::updateLA);
         break;
     default:
