@@ -16,7 +16,6 @@ enum MODE {
 enum STATE {
     TIME,
     SENSORS,
-    CHRONOMETER,
     ALARM
 };
 };// namespace stateUtil

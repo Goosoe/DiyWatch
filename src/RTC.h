@@ -60,6 +60,7 @@ void addMinute();
 
 // TODO: 
 
+/****TIME FUNCTIONS****/
 uint8_t getSeconds();
 
 uint8_t getWeekDay();
@@ -77,5 +78,12 @@ uint16_t addYear();
 uint8_t addDate();
 
 uint8_t getDate();
+
+/****ALARM FUNCTIONS****/
+uint8_t addAlrHour();
+
+uint8_t addAlrMinute();
+
+void getAlrTime(uint8_t* buff);
 //TODO: reset year
 };  // namespace mcpRtc

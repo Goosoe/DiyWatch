@@ -40,7 +40,7 @@ void resetEditMode(); //TODO: MAKE ENUM
  * @brief updates the EditField so it can alert the necessary displays about editing
  * @return the new editField value
  */
-uint8_t incrementEditField();
+uint8_t incrementEditField(stateUtil::STATE state = stateUtil::TIME);
 
 /**
  * @brief Sends an array (of size 4) to the seven-segment screen to be drawn

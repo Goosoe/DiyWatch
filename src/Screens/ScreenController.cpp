@@ -64,8 +64,12 @@ void resetEditMode() {
     blink = false;
 }
 
-uint8_t incrementEditField() {
-    uint8_t nextField = (editableField + 1) % MAX_EDITABLE_FIELDS_TIME; //TODO: change this when adding different editable fields
+uint8_t incrementEditField(stateUtil::STATE state) {
+    uint8_t maxFields = MAX_EDITABLE_FIELDS_TIME;
+    if (stateUtil::ALARM == state) {
+        maxFields = SEVEN_SEG_FIELDS;
+    }
+    uint8_t nextField = (editableField + 1) % maxFields; //TODO: change this when adding different editable fields
     setEditableField(nextField);
     lastBlink = millis();
     return nextField;

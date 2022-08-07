@@ -13,6 +13,7 @@ const uint8_t DATE_SIZE = 13;
 uint8_t state, mode = 0;
 char date[DATE_SIZE] = { 0 };
 bool updateLA = true;
+bool alarmOn = false;
 /**
  * @brief Resets all the blink information when going back to read mode
  *
@@ -35,6 +36,7 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B1_PRESS:
         if (stateUtil::MODE::READ == mode) {
             state = (state + 1) % (stateUtil::STATE::ALARM + 1);
+
             updateLA = true;
         }
         else if (stateUtil::MODE::EDIT == mode) {
@@ -47,7 +49,14 @@ void evalCommand(controls::COMMAND comm) {
                     updateLA = true;
                 }
             }
+            if (stateUtil::STATE::ALARM == state) {
+                if (screenController::incrementEditField(stateUtil::STATE::ALARM)) {
+                    screenController::setBlinkVal(false);
+                    screenController::LASendToBuffer("", true);
+                }
+            }
         }
+        // todo: screenController::incrementEditField(stateUtil::ALARM);
         break;
 
     case controls::COMMAND::B1_HOLD:
@@ -63,6 +72,9 @@ void evalCommand(controls::COMMAND comm) {
             resetBlink();
             if (stateUtil::STATE::TIME == state) {
                 screenController::LASendToBuffer(stateController::date, true);
+            }
+            else if (stateUtil::STATE::ALARM == state) {
+                screenController::setBlink(false);
             }
         }
         break;
@@ -102,14 +114,29 @@ void evalCommand(controls::COMMAND comm) {
                 prepareDate();
             }
         }
+        else if (stateUtil::STATE::ALARM == state) {
+            if (stateUtil::MODE::READ == mode) {
+                alarmOn = !alarmOn;
+            }
+            else if (stateUtil::MODE::EDIT == mode) {
+                switch (screenController::getEditField()) {
+                case 0: // edit hour field
+                    mcpRtc::addAlrHour();
+                    break;
+                case 1:
+                    mcpRtc::addAlrMinute();
+                    break;
+                default:
+                    break;
+                }
+                screenController::setBlinkVal(true);
+            }
+        }
         break;
-
     case controls::COMMAND::B2_HOLD:
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
                 //TODO:
-            }
-            else if (stateUtil::MODE::EDIT == mode) {   //TODO: thread addhour & addminute?
             }
             break;
         }
@@ -118,7 +145,6 @@ void evalCommand(controls::COMMAND comm) {
     }
 }
 }; //  namespace stateController
-
 
 /**
  * @brief Main setup
@@ -137,14 +163,14 @@ void setup() {
  */
 void loop() {
     updateComponents();
-    //TODO: add in the state machine? or make these functions be called over time
-    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
-    screenController::SSDraw(timeArr);
-    // screenController::LASendToBuffer("123456789");
-    //TODO: put in a function
+    //    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
+    //    screenController::SSDraw(timeArr);
+        // screenController::LASendToBuffer("123456789");
+        //TODO: put in a function
     switch (stateController::state) {
     case stateUtil::STATE::TIME: {
-        //TODO: DEBUG + optimize
+        mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
+        screenController::SSDraw(timeArr);
         if (stateUtil::MODE::READ == stateController::mode) {
             //TODO: dont update date every loop.
             screenController::LASendToBuffer(stateController::date, stateController::updateLA);
@@ -176,18 +202,23 @@ void loop() {
         break;
     }
     case stateUtil::STATE::SENSORS:
-        char* temp;
+        mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
+        screenController::SSDraw(timeArr);
+        char temp[4];  // space for a possible negative value and /0 character
         itoa(sensors::getTemp(), temp, 10);
         screenController::LASendToBuffer(temp, stateController::updateLA);
         break;
-
-    case stateUtil::STATE::CHRONOMETER:
-        //TODO: implement
-        screenController::LASendToBuffer("CHRONO", stateController::updateLA);
-        break;
     case stateUtil::STATE::ALARM:
         //TODO: implement
-        screenController::LASendToBuffer("ALARM", stateController::updateLA);
+        if (stateController::alarmOn) {
+            screenController::LASendToBuffer("ON", stateController::updateLA);
+        }
+        else {
+            screenController::LASendToBuffer("OFF", stateController::updateLA);
+        }
+        uint8_t alrmTime[4];
+        mcpRtc::getAlrTime(alrmTime);
+        screenController::SSDraw(alrmTime);
         break;
     default:
         break;

@@ -17,6 +17,10 @@ const uint8_t YEAR_REG = 0x06;
 const uint8_t CONTROL_REG = 0x07;
 const uint8_t OSC_TRIM_REG = 0x08;
 
+/* ALARM REGISTERS (Bytes)*/
+const uint8_t MIN_ALR_REG = 0x0B;
+const uint8_t HOUR_ALR_REG = 0x0C;
+
 const uint16_t STARTING_YEAR = 2021;
 
 void setup() {
@@ -24,6 +28,7 @@ void setup() {
     Wire.setClock(100000);    // 10kHz is the default I2C communication frequency
     writeBit(SEC_REG, 7, 1);  // starting up the oscilattor using the ST bit
     writeBit(HOUR_REG, 6, 0);   //hour format (0 = 24h, 1 = 12h)
+    writeBit(HOUR_ALR_REG, 6, 0);   //alarm hour format (0 = 24h, 1 = 12h)
 }
 
 uint8_t getTime(uint8_t* arr, const uint8_t size) {
@@ -86,8 +91,33 @@ void writeBit(const uint8_t address, const uint8_t pos, const uint8_t bit) {
     writeByte(address, readByte(address) & (~bit_mask) | val);
 }
 
-void addHour() {
-    uint8_t addr = readByte(HOUR_REG);
+uint8_t addMinuteAux(uint8_t reg) {  //TODO: reset seconds when minute is added?
+    uint8_t addr = readByte(reg);
+
+    uint8_t ones = addr & 0xF;          // get bit 0 to 3
+    uint8_t tens = (addr >> 4) & 0x7;  // get bit 4 to 6
+    int8_t bit_mask = 0b01111111;
+
+    switch (ones) {
+    case 9:
+        if (tens == 5) {
+            addr = addr & (~bit_mask);    // resets minute hour ones and tens to 0
+        }
+        else {
+            tens = (tens + 1) << 4;
+            addr = (addr & (~bit_mask)) | tens;     // resets the minute ones to 0 and sets the new tens value
+        }
+        break;
+    default:
+        addr++;
+        break;
+    }
+    writeByte(reg, addr);
+    return tens * 10 + ones;
+}
+
+uint8_t addHourAux(uint8_t reg) {
+    uint8_t addr = readByte(reg);
 
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 and 5
@@ -112,31 +142,16 @@ void addHour() {
         addr++;
         break;
     }
-    writeByte(HOUR_REG, addr);
+    writeByte(reg, addr);
+    return tens * 10 + ones;
+}
+
+void addHour() {
+    addHourAux(HOUR_REG);
 }
 
 void addMinute() {  //TODO: reset seconds when minute is added?
-    uint8_t addr = readByte(MIN_REG);
-
-    uint8_t ones = addr & 0xF;          // get bit 0 to 3
-    uint8_t tens = (addr >> 4) & 0x7;  // get bit 4 to 6
-    int8_t bit_mask = 0b01111111;
-
-    switch (ones) {
-    case 9:
-        if (tens == 5) {
-            addr = addr & (~bit_mask);    // resets minute hour ones and tens to 0
-        }
-        else {
-            tens = (tens + 1) << 4;
-            addr = (addr & (~bit_mask)) | tens;     // resets the minute ones to 0 and sets the new tens value
-        }
-        break;
-    default:
-        addr++;
-        break;
-    }
-    writeByte(MIN_REG, addr);
+    addMinuteAux(MIN_REG);
 }
 
 uint8_t getSeconds() {
@@ -242,5 +257,35 @@ uint8_t getDate() {
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 to 7
     return tens * 10 + ones;
+}
+
+uint8_t getAlrHour() {
+    return addHourAux(HOUR_ALR_REG);
+}
+
+uint8_t getAlrMinute() {
+    return addMinuteAux(MIN_ALR_REG);
+}
+
+uint8_t addAlrHour() {
+    return addHourAux(HOUR_ALR_REG);
+}
+
+uint8_t addAlrMinute() {
+    return addMinuteAux(MIN_ALR_REG);
+}
+
+void getAlrTime(uint8_t* buff) {
+    uint8_t addr = readByte(MIN_ALR_REG);
+    uint8_t ones = addr & 0xF;
+    uint8_t tens = (addr >> 4) & 0x7;
+    buff[2] = tens;
+    buff[3] = ones;
+
+    addr = readByte(HOUR_ALR_REG);
+    ones = addr & 0xF;          // get bit 0 to 3
+    tens = (addr >> 4) & 0x3;  // get bit 4 and 5
+    buff[0] = tens;
+    buff[1] = ones;
 }
 };  // namespace mcpRtc

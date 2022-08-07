@@ -3,7 +3,7 @@ This project is my take on making a personal time-keeping device with some senso
 
 The final objective is to have a clock relying solely on the atmega 328p chip and the other necessary external components (not dependant on the arduino board). 
 
-The clock will display time, temperature and altitude plushave an alarm and a chronometer feature. 
+The clock will display time, temperature and altitude plus have an alarm.
 
 
 # FAQ
