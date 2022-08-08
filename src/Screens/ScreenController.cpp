@@ -89,7 +89,7 @@ void setBlink(const bool val) {
 }
 
 void setBlinkVal(const bool val) {
-    if (editableField < SEVEN_SEG_FIELDS) {   //0 = hours, 1 = minutes //TODO: magic numbers
+    if (editableField < SEVEN_SEG_FIELDS) {   //0 = hours, 1 = minutes 
         svnSeg::setPartialScreenPower(val);
     }
     else {

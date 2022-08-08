@@ -79,11 +79,29 @@ uint8_t addDate();
 
 uint8_t getDate();
 
+//TODO: reset year
 /****ALARM FUNCTIONS****/
 uint8_t addAlrHour();
 
 uint8_t addAlrMinute();
 
+uint8_t toggleAlarm();
+
+/**
+ * @brief gets the ALMIF flags in an uint form
+ * 0bn0 - n holds the value for the alarm register 0
+ * 0b0n - n holds the value for the alarm register 1
+ * @return uint8_t - [0,3]
+ */
+uint8_t getAlarmFlags();
+
+/**
+ * @brief Checks the ALMIF flag
+ * alarmId = 0 - Alarm register 0
+ * alarmId = 1 - Alarm register 1
+ * @param alarmId  [0,1]
+ */
+void resetAlarmFlag(uint8_t alarmId);
+
 void getAlrTime(uint8_t* buff);
-//TODO: reset year
 };  // namespace mcpRtc
