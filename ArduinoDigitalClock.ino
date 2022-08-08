@@ -4,9 +4,6 @@
 #include "src/Util.h"
 #include "src/Sensors.h"
 
-const uint8_t SIZE = 6;
-uint8_t timeArr[SIZE] = { 0 };
-const uint8_t STARTING_YEAR = 20; //The year the clock displays + 1
 
 namespace stateController {
 const uint8_t DATE_SIZE = 13;
@@ -50,10 +47,9 @@ void evalCommand(controls::COMMAND comm) {
                 }
             }
             if (stateUtil::STATE::ALARM == state) {
-                if (screenController::incrementEditField(stateUtil::STATE::ALARM)) {
-                    screenController::setBlinkVal(false);
-                    screenController::LASendToBuffer("", true);
-                }
+                screenController::incrementEditField(stateUtil::STATE::ALARM);
+                screenController::setBlinkVal(false);
+
             }
         }
         // todo: screenController::incrementEditField(stateUtil::ALARM);
@@ -116,7 +112,8 @@ void evalCommand(controls::COMMAND comm) {
         }
         else if (stateUtil::STATE::ALARM == state) {
             if (stateUtil::MODE::READ == mode) {
-                alarmOn = !alarmOn;
+                alarmOn = mcpRtc::toggleAlarm();
+                updateLA = true;
             }
             else if (stateUtil::MODE::EDIT == mode) {
                 switch (screenController::getEditField()) {
@@ -146,6 +143,12 @@ void evalCommand(controls::COMMAND comm) {
 }
 }; //  namespace stateController
 
+const uint16_t REFRESH = 1;  // nr of updates per sec
+const float UPDATE_TIME = 1000 / REFRESH;
+const uint8_t SIZE = 6;
+
+uint8_t timeArr[SIZE] = { 0 };
+uint32_t lastUpdate = 0;  // time in ms
 /**
  * @brief Main setup
  */
@@ -163,6 +166,7 @@ void setup() {
  */
 void loop() {
     updateComponents();
+    checkAlarm();
     //    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
     //    screenController::SSDraw(timeArr);
         // screenController::LASendToBuffer("123456789");
@@ -235,4 +239,25 @@ void updateComponents() {
     screenController::update();
     controls::update(&stateController::evalCommand);
     sensors::update();
+}
+
+void checkAlarm() {
+    uint32_t time = millis();
+    if (time - lastUpdate < UPDATE_TIME) {
+        return;
+    }
+    if (!stateController::alarmOn) {
+        return;
+    }
+    uint8_t alarmRegState = mcpRtc::getAlarmFlags();
+    if (alarmRegState == 3) {  // both alarms have been triggered
+        //TODO: output alarm
+        Serial.println("ALARM!");
+        mcpRtc::resetAlarmFlag(0);
+        mcpRtc::resetAlarmFlag(1);
+    }
+    else if (alarmRegState == 1) {  // only minute alarm has been triggered
+        mcpRtc::resetAlarmFlag(0);
+    }
+    lastUpdate = time;
 }

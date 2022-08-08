@@ -19,9 +19,13 @@ const uint8_t OSC_TRIM_REG = 0x08;
 
 /* ALARM REGISTERS (Bytes)*/
 const uint8_t MIN_ALR_REG = 0x0B;
-const uint8_t HOUR_ALR_REG = 0x0C;
+const uint8_t HOUR_ALR_REG = 0x13;
+const uint8_t WEEK_ALR0_REG = 0x0D;
+const uint8_t WEEK_ALR1_REG = 0x14;
 
-const uint16_t STARTING_YEAR = 2021;
+void writeAlarmMask(uint8_t address, uint8_t mask) {
+    writeByte(address, readByte(address) | (mask << 4));
+}
 
 void setup() {
     Wire.begin();
@@ -29,6 +33,8 @@ void setup() {
     writeBit(SEC_REG, 7, 1);  // starting up the oscilattor using the ST bit
     writeBit(HOUR_REG, 6, 0);   //hour format (0 = 24h, 1 = 12h)
     writeBit(HOUR_ALR_REG, 6, 0);   //alarm hour format (0 = 24h, 1 = 12h)
+    writeAlarmMask(WEEK_ALR0_REG, 0b001); // ALR0 - set minutes mask
+    writeAlarmMask(WEEK_ALR1_REG, 0b010); // ALR1 - set hour mask
 }
 
 uint8_t getTime(uint8_t* arr, const uint8_t size) {
@@ -213,7 +219,6 @@ uint16_t addYear() {
     uint8_t tens = (addr >> 4) & 0xF;  // get bit 4 to 6
     uint8_t bit_mask = 0b11111111;
     addr++; //added here to prevent defaults and repetition
-
     switch (ones) {
     case 9: {
         if (tens == 9) {
@@ -231,7 +236,6 @@ uint16_t addYear() {
 
 uint8_t addDate() {
     uint8_t addr = readByte(DATE_REG);
-
     uint8_t ones = addr & 0xF;          // get bit 0 to 3
     uint8_t tens = (addr >> 4) & 0x3;  // get bit 4 and 5
     uint8_t bit_mask = 0b00111111;
@@ -273,6 +277,34 @@ uint8_t addAlrHour() {
 
 uint8_t addAlrMinute() {
     return addMinuteAux(MIN_ALR_REG);
+}
+
+uint8_t toggleAlarm() {
+    uint8_t alarmVal = readByte(CONTROL_REG) >> 0x4 & 0x1;
+    alarmVal = (alarmVal + 1) % 2;
+    writeBit(CONTROL_REG, 4, alarmVal); // toggle ALM0EN register
+    writeBit(CONTROL_REG, 5, alarmVal); // toggle ALM1EN register
+    return alarmVal;
+}
+uint8_t getAlarmFlags() {
+    uint8_t result = 0;
+    uint8_t val = readByte(WEEK_ALR0_REG);
+    result += val >> 3 & 0b1;
+    val = readByte(WEEK_ALR1_REG);
+    result += val >> 2 & 0b10;
+    return result;
+}
+
+void resetAlarmFlag(uint8_t alarmId) {
+    if (alarmId < 0 || alarmId > 2) {
+        return;
+    }
+    uint8_t address = WEEK_ALR0_REG;
+    if (alarmId) {
+        address = WEEK_ALR1_REG;
+    }
+    uint8_t regVal = readByte(address);
+    writeByte(address, regVal & 0b11110111);
 }
 
 void getAlrTime(uint8_t* buff) {
