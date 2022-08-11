@@ -3,7 +3,6 @@
 #include <math.h>  
 namespace sensors {
 
-const uint8_t TEMP_CALIBRATION_OFFSET = 10;
 const uint8_t TEMP_ARR_SIZE = 5;
 const uint8_t TEMP_SENSOR = 17; //port A3
 const uint16_t UPDATE_TIME = 60000; // ms TODO: change to a reasonable value
@@ -41,7 +40,7 @@ void update() {
 uint8_t readTempSensor() {
     int reading = analogRead(TEMP_SENSOR);
     float voltage = reading * (4750 / 1024.0f);  // voltage being sent is around 4.75V and current is ~1.02 mA
-    currentTemp = round(voltage / 10 - 273.15f - TEMP_CALIBRATION_OFFSET); //convert from K to C and remove 10 to counter the offset
+    currentTemp = round(voltage / 10 - 273.15f); //convert from K to C and remove 10 to counter the offset
     return currentTemp;
 }
 

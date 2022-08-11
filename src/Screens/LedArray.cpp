@@ -260,7 +260,7 @@ void sendToBuffer(const char* text, const bool reset) {
             Buffer.displayBuffer[nextBuffVal][idx++] = 0; //add space between chars
         }
     }
-    Buffer.bufferSize[nextBuffVal] = idx; // + 1;  //index starts at 0, the size is +1
+    Buffer.bufferSize[nextBuffVal] = idx;
     if (reset) {
         resetBuffer(Buffer.currentBuffer);
         Buffer.currentBuffer = nextBuffVal;

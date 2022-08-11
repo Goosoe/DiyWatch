@@ -3,14 +3,20 @@
 #include "src/Screens/ScreenController.h"
 #include "src/Util.h"
 #include "src/Sensors.h"
+#include "src/Actuators.h"
 
 
 namespace stateController {
 const uint8_t DATE_SIZE = 13;
+const uint16_t ALARM_MAX_TIMEOUT = 62000; // 1 min 2 sec
+uint32_t alarmTimeout = 0;
 uint8_t state, mode = 0;
 char date[DATE_SIZE] = { 0 };
 bool updateLA = true;
 bool alarmOn = false;
+bool alarmTimeoutMode = false;
+bool alarmTriggered = false;
+
 /**
  * @brief Resets all the blink information when going back to read mode
  *
@@ -76,6 +82,12 @@ void evalCommand(controls::COMMAND comm) {
         break;
 
     case controls::COMMAND::B2_PRESS:
+        if (stateController::alarmTriggered) {
+            alarmTimeoutMode = true;
+            //alarmOn = mcpRtc::toggleAlarm();
+            actuators::setVibrator(false);
+            break;
+        }
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
                 //TODO:
@@ -157,6 +169,7 @@ void setup() {
     mcpRtc::setup();
     controls::setup();
     sensors::setup();
+    actuators::setup();
     stateController::prepareDate();
     Serial.begin(9600); // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
 }
@@ -166,7 +179,9 @@ void setup() {
  */
 void loop() {
     updateComponents();
-    checkAlarm();
+    if (stateUtil::MODE::EDIT != stateController::mode) {
+        checkAlarm();
+    }
     //    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
     //    screenController::SSDraw(timeArr);
         // screenController::LASendToBuffer("123456789");
@@ -239,25 +254,45 @@ void updateComponents() {
     screenController::update();
     controls::update(&stateController::evalCommand);
     sensors::update();
+    actuators::update();
 }
 
 void checkAlarm() {
     uint32_t time = millis();
-    if (time - lastUpdate < UPDATE_TIME) {
+    uint32_t timeSinceUpdate = time - lastUpdate;
+    if (timeSinceUpdate < UPDATE_TIME) {
         return;
     }
+    lastUpdate = time;
+    if (stateController::alarmTimeoutMode) {
+        stateController::alarmTimeout += timeSinceUpdate;
+        if (stateController::alarmTimeout < stateController::ALARM_MAX_TIMEOUT) {
+            return;
+        }
+        Serial.println("60 seconds have passed");
+        stateController::alarmTimeout = 0;
+        stateController::alarmTriggered = false;
+        stateController::alarmTimeoutMode = false;
+        mcpRtc::resetAlarmFlag(0);
+        mcpRtc::resetAlarmFlag(1);
+        return;
+    }
+
     if (!stateController::alarmOn) {
         return;
     }
     uint8_t alarmRegState = mcpRtc::getAlarmFlags();
     if (alarmRegState == 3) {  // both alarms have been triggered
-        //TODO: output alarm
-        Serial.println("ALARM!");
+        if (!stateController::alarmTriggered) {
+            actuators::setVibrator(true);
+            stateController::alarmTriggered = true;
+        }
         mcpRtc::resetAlarmFlag(0);
         mcpRtc::resetAlarmFlag(1);
     }
-    else if (alarmRegState == 1) {  // only minute alarm has been triggered
-        mcpRtc::resetAlarmFlag(0);
+    else if (alarmRegState > 0) {  // only one register has been triggered
+        mcpRtc::resetAlarmFlag(alarmRegState - 1);
+        actuators::setVibrator(false);
+        stateController::alarmTriggered = false;
     }
-    lastUpdate = time;
 }
