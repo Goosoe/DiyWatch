@@ -38,7 +38,6 @@ void setup() {
 }
 
 uint8_t getTime(uint8_t* arr, const uint8_t size) {
-    //TODO: sizeof?
     if (size != 4 && size != 6) {
         return 0;
     }

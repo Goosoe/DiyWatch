@@ -58,7 +58,6 @@ void evalCommand(controls::COMMAND comm) {
 
             }
         }
-        // todo: screenController::incrementEditField(stateUtil::ALARM);
         break;
 
     case controls::COMMAND::B1_HOLD:
@@ -66,7 +65,6 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::STATE::TIME == state || stateUtil::STATE::ALARM == state) {
                 mode = stateUtil::MODE::EDIT;
                 screenController::setBlink(true);
-                //TODO: set mode
             }
         }
         else if (stateUtil::MODE::EDIT == mode) {
@@ -90,7 +88,7 @@ void evalCommand(controls::COMMAND comm) {
         }
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                //TODO:
+                //does nothing
             }
             else if (stateUtil::MODE::EDIT == mode) {
                 if (screenController::getEditField() >= screenController::SEVEN_SEG_FIELDS) {
@@ -145,7 +143,7 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B2_HOLD:
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                //TODO:
+                // does nothing
             }
             break;
         }
@@ -171,7 +169,6 @@ void setup() {
     sensors::setup();
     actuators::setup();
     stateController::prepareDate();
-    Serial.begin(9600); // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
 }
 
 /**
@@ -228,7 +225,6 @@ void loop() {
         screenController::LASendToBuffer(temp, stateController::updateLA);
         break;
     case stateUtil::STATE::ALARM:
-        //TODO: implement
         if (stateController::alarmOn) {
             screenController::LASendToBuffer("ON", stateController::updateLA);
         }

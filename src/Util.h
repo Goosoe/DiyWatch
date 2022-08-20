@@ -21,11 +21,23 @@ enum STATE {
 };// namespace stateUtil
 namespace util {
 
-void numToDayWeek(const uint8_t val, char* out, uint8_t& index);// TODO: not good return
+/**
+ * @brief converts a number to a name of the days of the week
+ */
+void numToDayWeek(const uint8_t val, char* out, uint8_t& index);
 
-void numToMonth(uint8_t val, char* out, uint8_t& index); // TODO: not good
+/**
+ * @brief converts a number to a name of the month
+ */
+void numToMonth(uint8_t val, char* out, uint8_t& index); 
 
+/**
+ * @brief converts a int number to its char representation
+ */
 void numToChar(uint16_t val, char* out, uint8_t& index);
 
+/**
+ * @brief converts a bunch of data into a date format "dd ww mm yy"
+ */
 void createDate(char* dateArr, const uint8_t day, const uint8_t weekDay, const uint8_t month, const uint16_t year);
 }; // namespace util

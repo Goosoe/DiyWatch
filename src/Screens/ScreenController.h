@@ -16,7 +16,6 @@ const uint8_t LED_ARR_FIELDS_TIME = 4;
 
 const uint8_t MAX_EDITABLE_FIELDS_TIME = SEVEN_SEG_FIELDS + LED_ARR_FIELDS_TIME;  //TODO: update when adding more displays - DEPENDS ON WHICH SCREEN WE'RE USING
 
-// pins that control the NPN transistor that opens the clock to the specific display
 /**
  * @brief Setup.
  * Must be called in the main setup
@@ -34,7 +33,7 @@ void update();
  * @brief Resets the edit mode.
  * Sets the editfield to 0 and blink to false
  */
-void resetEditMode(); //TODO: MAKE ENUM
+void resetEditMode(); 
 
 /**
  * @brief updates the EditField so it can alert the necessary displays about editing
