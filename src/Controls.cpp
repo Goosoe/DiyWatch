@@ -28,7 +28,7 @@ void setup() {
 
 //TODO: remove prints
 void update(void(*observer)(COMMAND)) {
-    const uint32_t time = millis();
+    uint32_t time = millis();
     if (time < lastUpdate) {      // Saves from the time eventual overflow
         lastUpdate = time;
     }

@@ -2,7 +2,7 @@
  * @file Controls.h
  * @author Goosoe
  * @brief
- * API for the button/switches components
+ * API for the switch components
  */
 #pragma once
 #include <stdint.h>

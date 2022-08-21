@@ -19,7 +19,7 @@ void update();
 
 /**
  * @brief Get the average temperature
- * @return int8_t
+ * @return uint8_t
  */
-int8_t getTemp();
+uint8_t getTemp();
 };  //namespace sensors

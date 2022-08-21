@@ -51,7 +51,7 @@ bool slideText = true;
 struct Buffer {
     int displayBuffer[NUM_OF_DISPLAY_BUFFERS][BUFFER_MAX_CHARACTERS] = { {0}, {0} }; //double buffer display
     uint8_t currentBuffer = 0;
-    String bufferText[NUM_OF_DISPLAY_BUFFERS] = { String() };
+    String bufferText[NUM_OF_DISPLAY_BUFFERS] = { String() }; //todo: char*
 
     int8_t bufferIdx = -ROWS; // used as a comparison with bufferSize. When they are equal, we know the buffer has slid from right to left 
     uint8_t bufferSize[NUM_OF_DISPLAY_BUFFERS] = { 0 };
@@ -260,7 +260,7 @@ void sendToBuffer(const char* text, const bool reset) {
             Buffer.displayBuffer[nextBuffVal][idx++] = 0; //add space between chars
         }
     }
-    Buffer.bufferSize[nextBuffVal] = idx; // + 1;  //index starts at 0, the size is +1
+    Buffer.bufferSize[nextBuffVal] = idx;
     if (reset) {
         resetBuffer(Buffer.currentBuffer);
         Buffer.currentBuffer = nextBuffVal;

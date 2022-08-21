@@ -3,17 +3,20 @@
 #include "src/Screens/ScreenController.h"
 #include "src/Util.h"
 #include "src/Sensors.h"
-#include <string.h>
+#include "src/Actuators.h"
 
-const uint8_t SIZE = 6;
-uint8_t timeArr[SIZE] = { 0 };
-const uint8_t STARTING_YEAR = 20; //The year the clock displays + 1
 
 namespace stateController {
 const uint8_t DATE_SIZE = 13;
+const uint16_t ALARM_MAX_TIMEOUT = 62000; // 1 min 2 sec
+uint32_t alarmTimeout = 0;
 uint8_t state, mode = 0;
 char date[DATE_SIZE] = { 0 };
 bool updateLA = true;
+bool alarmOn = false;
+bool alarmTimeoutMode = false;
+bool alarmTriggered = false;
+
 /**
  * @brief Resets all the blink information when going back to read mode
  *
@@ -36,6 +39,7 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B1_PRESS:
         if (stateUtil::MODE::READ == mode) {
             state = (state + 1) % (stateUtil::STATE::ALARM + 1);
+
             updateLA = true;
         }
         else if (stateUtil::MODE::EDIT == mode) {
@@ -48,6 +52,11 @@ void evalCommand(controls::COMMAND comm) {
                     updateLA = true;
                 }
             }
+            if (stateUtil::STATE::ALARM == state) {
+                screenController::incrementEditField(stateUtil::STATE::ALARM);
+                screenController::setBlinkVal(false);
+
+            }
         }
         break;
 
@@ -56,7 +65,6 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::STATE::TIME == state || stateUtil::STATE::ALARM == state) {
                 mode = stateUtil::MODE::EDIT;
                 screenController::setBlink(true);
-                //TODO: set mode
             }
         }
         else if (stateUtil::MODE::EDIT == mode) {
@@ -65,13 +73,22 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::STATE::TIME == state) {
                 screenController::LASendToBuffer(stateController::date, true);
             }
+            else if (stateUtil::STATE::ALARM == state) {
+                screenController::setBlink(false);
+            }
         }
         break;
 
     case controls::COMMAND::B2_PRESS:
+        if (stateController::alarmTriggered) {
+            alarmTimeoutMode = true;
+            //alarmOn = mcpRtc::toggleAlarm();
+            actuators::setVibrator(false);
+            break;
+        }
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                //TODO:
+                //does nothing
             }
             else if (stateUtil::MODE::EDIT == mode) {
                 if (screenController::getEditField() >= screenController::SEVEN_SEG_FIELDS) {
@@ -103,14 +120,30 @@ void evalCommand(controls::COMMAND comm) {
                 prepareDate();
             }
         }
+        else if (stateUtil::STATE::ALARM == state) {
+            if (stateUtil::MODE::READ == mode) {
+                alarmOn = mcpRtc::toggleAlarm();
+                updateLA = true;
+            }
+            else if (stateUtil::MODE::EDIT == mode) {
+                switch (screenController::getEditField()) {
+                case 0: // edit hour field
+                    mcpRtc::addAlrHour();
+                    break;
+                case 1:
+                    mcpRtc::addAlrMinute();
+                    break;
+                default:
+                    break;
+                }
+                screenController::setBlinkVal(true);
+            }
+        }
         break;
-
     case controls::COMMAND::B2_HOLD:
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                //TODO:
-            }
-            else if (stateUtil::MODE::EDIT == mode) {   //TODO: thread addhour & addminute?
+                // does nothing
             }
             break;
         }
@@ -120,7 +153,12 @@ void evalCommand(controls::COMMAND comm) {
 }
 }; //  namespace stateController
 
+const uint16_t REFRESH = 1;  // nr of updates per sec
+const float UPDATE_TIME = 1000 / REFRESH;
+const uint8_t SIZE = 6;
 
+uint8_t timeArr[SIZE] = { 0 };
+uint32_t lastUpdate = 0;  // time in ms
 /**
  * @brief Main setup
  */
@@ -129,8 +167,8 @@ void setup() {
     mcpRtc::setup();
     controls::setup();
     sensors::setup();
+    actuators::setup();
     stateController::prepareDate();
-    Serial.begin(9600); // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
 }
 
 /**
@@ -138,16 +176,15 @@ void setup() {
  */
 void loop() {
     updateComponents();
-    //TODO: add in the state machine? or make these functions be called over time
-    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
-    screenController::SSDraw(timeArr);
-    // screenController::LASendToBuffer("123456789");
-    //TODO: put in a function
+    if (stateUtil::MODE::EDIT != stateController::mode) {
+        checkAlarm();
+    }
     switch (stateController::state) {
     case stateUtil::STATE::TIME: {
-        //TODO: DEBUG + optimize
+        mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
+        screenController::SSDraw(timeArr);
         if (stateUtil::MODE::READ == stateController::mode) {
-            //TODO: dont update date every loop.
+            //TODO: dont update date every loop
             screenController::LASendToBuffer(stateController::date, stateController::updateLA);
         }
         else {
@@ -177,14 +214,22 @@ void loop() {
         break;
     }
     case stateUtil::STATE::SENSORS:
-        screenController::LASendToBuffer(String(sensors::getTemp()).c_str(), stateController::updateLA);
-        break;
-
-    case stateUtil::STATE::CHRONOMETER:
-        screenController::LASendToBuffer("CHRONO", stateController::updateLA);
+        mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
+        screenController::SSDraw(timeArr);
+        char temp[4];  // space for a possible negative value and /0 character
+        itoa(sensors::getTemp(), temp, 10);
+        screenController::LASendToBuffer(temp, stateController::updateLA);
         break;
     case stateUtil::STATE::ALARM:
-        screenController::LASendToBuffer("ALARM", stateController::updateLA);
+        if (stateController::alarmOn) {
+            screenController::LASendToBuffer("ON", stateController::updateLA);
+        }
+        else {
+            screenController::LASendToBuffer("OFF", stateController::updateLA);
+        }
+        uint8_t alrmTime[4];
+        mcpRtc::getAlrTime(alrmTime);
+        screenController::SSDraw(alrmTime);
         break;
     default:
         break;
@@ -201,4 +246,45 @@ void updateComponents() {
     screenController::update();
     controls::update(&stateController::evalCommand);
     sensors::update();
+    actuators::update();
+}
+
+void checkAlarm() {
+    uint32_t time = millis();
+    uint32_t timeSinceUpdate = time - lastUpdate;
+    if (timeSinceUpdate < UPDATE_TIME) {
+        return;
+    }
+    lastUpdate = time;
+    if (stateController::alarmTimeoutMode) {
+        stateController::alarmTimeout += timeSinceUpdate;
+        if (stateController::alarmTimeout < stateController::ALARM_MAX_TIMEOUT) {
+            return;
+        }
+        Serial.println("60 seconds have passed");
+        stateController::alarmTimeout = 0;
+        stateController::alarmTriggered = false;
+        stateController::alarmTimeoutMode = false;
+        mcpRtc::resetAlarmFlag(0);
+        mcpRtc::resetAlarmFlag(1);
+        return;
+    }
+
+    if (!stateController::alarmOn) {
+        return;
+    }
+    uint8_t alarmRegState = mcpRtc::getAlarmFlags();
+    if (alarmRegState == 3) {  // both alarms have been triggered
+        if (!stateController::alarmTriggered) {
+            actuators::setVibrator(true);
+            stateController::alarmTriggered = true;
+        }
+        mcpRtc::resetAlarmFlag(0);
+        mcpRtc::resetAlarmFlag(1);
+    }
+    else if (alarmRegState > 0) {  // only one register has been triggered
+        mcpRtc::resetAlarmFlag(alarmRegState - 1);
+        actuators::setVibrator(false);
+        stateController::alarmTriggered = false;
+    }
 }
