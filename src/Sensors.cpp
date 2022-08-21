@@ -1,5 +1,4 @@
 #include "Sensors.h"
-#include "Arduino.h"    //TODO: remove after debug
 #include <math.h>  
 namespace sensors {
 

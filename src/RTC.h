@@ -58,8 +58,6 @@ void addHour();
  */
 void addMinute();
 
-// TODO: 
-
 /****TIME FUNCTIONS****/
 uint8_t getSeconds();
 
@@ -80,6 +78,7 @@ uint8_t addDate();
 uint8_t getDate();
 
 //TODO: reset year
+
 /****ALARM FUNCTIONS****/
 uint8_t addAlrHour();
 
@@ -103,5 +102,8 @@ uint8_t getAlarmFlags();
  */
 void resetAlarmFlag(uint8_t alarmId);
 
+/**
+ * @brief gets the alarm hour and minutes in the format hhmm.
+ */
 void getAlrTime(uint8_t* buff);
 };  // namespace mcpRtc
