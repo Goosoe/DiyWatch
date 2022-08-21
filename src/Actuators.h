@@ -10,5 +10,5 @@ void setup();
 
 void update();
 
-void setVibrator(bool on);
+void setVibrator(const bool on);
 }

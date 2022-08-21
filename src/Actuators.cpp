@@ -37,7 +37,7 @@ void update() {
     updateVibrator();
 }
 
-void setVibrator(bool on) {
+void setVibrator(const bool on) {
     vibrate = on;
     if (!on) {
         digitalWrite(VIBRATOR, LOW);

@@ -58,7 +58,6 @@ void evalCommand(controls::COMMAND comm) {
 
             }
         }
-        // todo: screenController::incrementEditField(stateUtil::ALARM);
         break;
 
     case controls::COMMAND::B1_HOLD:
@@ -66,7 +65,6 @@ void evalCommand(controls::COMMAND comm) {
             if (stateUtil::STATE::TIME == state || stateUtil::STATE::ALARM == state) {
                 mode = stateUtil::MODE::EDIT;
                 screenController::setBlink(true);
-                //TODO: set mode
             }
         }
         else if (stateUtil::MODE::EDIT == mode) {
@@ -90,7 +88,7 @@ void evalCommand(controls::COMMAND comm) {
         }
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                //TODO:
+                //TODO: switch between date and seconds?
             }
             else if (stateUtil::MODE::EDIT == mode) {
                 if (screenController::getEditField() >= screenController::SEVEN_SEG_FIELDS) {
@@ -145,7 +143,7 @@ void evalCommand(controls::COMMAND comm) {
     case controls::COMMAND::B2_HOLD:
         if (stateUtil::STATE::TIME == state) {
             if (stateUtil::MODE::READ == mode) {
-                //TODO:
+                //TODO: 
             }
             break;
         }
@@ -171,7 +169,6 @@ void setup() {
     sensors::setup();
     actuators::setup();
     stateController::prepareDate();
-    Serial.begin(9600); // TODO: DEBUG PURPOSE. DELETE AFTERWARDS
 }
 
 /**
@@ -182,16 +179,12 @@ void loop() {
     if (stateUtil::MODE::EDIT != stateController::mode) {
         checkAlarm();
     }
-    //    mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
-    //    screenController::SSDraw(timeArr);
-        // screenController::LASendToBuffer("123456789");
-        //TODO: put in a function
     switch (stateController::state) {
     case stateUtil::STATE::TIME: {
         mcpRtc::getTime(timeArr, SIZE); //TODO: does not need to be called every iteration. 10 times per second maybe?  
         screenController::SSDraw(timeArr);
         if (stateUtil::MODE::READ == stateController::mode) {
-            //TODO: dont update date every loop.
+            //TODO: dont update date every loop
             screenController::LASendToBuffer(stateController::date, stateController::updateLA);
         }
         else {
