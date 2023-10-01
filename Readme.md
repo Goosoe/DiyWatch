@@ -6,7 +6,7 @@ The final objective is to have a clock relying solely on the atmega 328p chip an
 # Update
 Unfortunately, due to the chosen RTC only being able to store up to the seconds value it is impossible to create an arduino board independant hardware, as this implementation requires the use of milliseconds to run. Same goes to the chronometer implementation.
 
-The clock will display time, temperature and altitude plus have an alarm.
+The clock will display time, date, temperature, plus have an alarm.
 
 
 # FAQ
@@ -14,5 +14,5 @@ The clock will display time, temperature and altitude plus have an alarm.
 Mainly to learn about embedded programming and resource constrained systems :)
 
 ## Why not use classes on this implementation?
-OOP usually shines when multiple instances of the same data-structure is required. For this project I've recognized that it was only needed one instance of each type and so I've done this implementation totally functional.
+OOP usually shines when multiple instances of the same data-structure is required. For this project I've recognized that it was only needed one instance of each type and so I've done this implementation totally imperative/procedural.
 
